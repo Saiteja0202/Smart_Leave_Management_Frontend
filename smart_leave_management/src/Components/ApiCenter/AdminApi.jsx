@@ -6,6 +6,9 @@ const BASE_URL = 'http://localhost:8765';
 export const registerAdmin = (adminData) =>
   axios.post(`${BASE_URL}/admin/registration`, adminData);
 
+export const registrationHistory = () =>
+  axios.get(`${BASE_URL}/admin/get-registration-history`);
+
 export const loginAdmin = (loginDetails) =>
   axios.post(`${BASE_URL}/admin/login`, loginDetails);
 

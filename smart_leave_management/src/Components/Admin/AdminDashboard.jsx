@@ -24,6 +24,7 @@ const navItems = [
   { label: 'Users', path: 'users' },
   { label: 'Leave Requests', path: 'leave-requests' },
   {label:'Reports', path:'reports'},
+  {label:'Registration History', path:'registration-history'},
 ];
 
 const AdminDashboard = () => {

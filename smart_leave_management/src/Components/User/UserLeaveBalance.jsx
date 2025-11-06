@@ -6,7 +6,14 @@ import {
   CircularProgress,
   Grid,
   Box,
+  Avatar,
 } from '@mui/material';
+import BeachAccessIcon from '@mui/icons-material/BeachAccess';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import ChildCareIcon from '@mui/icons-material/ChildCare';
+import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom';
+import WorkOffIcon from '@mui/icons-material/WorkOff';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 
 const UserLeaveBalance = () => {
   const userId = sessionStorage.getItem('userId');
@@ -17,7 +24,7 @@ const UserLeaveBalance = () => {
     const fetchBalance = async () => {
       try {
         const res = await getUserLeaveBalance(userId);
-        setBalanceData(res.data[0]); 
+        setBalanceData(res.data[0]);
       } catch {
         setBalanceData(null);
       } finally {
@@ -28,36 +35,67 @@ const UserLeaveBalance = () => {
   }, [userId]);
 
   const leaveTypes = [
-    { key: 'sickLeave', label: 'Sick Leave' },
-    { key: 'casualLeave', label: 'Casual Leave' },
-    { key: 'earnedLeave', label: 'Earned Leave' },
-    { key: 'paternityLeave', label: 'Paternity Leave' },
-    { key: 'maternityLeave', label: 'Maternity Leave' },
-    { key: 'lossOfPay', label: 'Loss of Pay' },
-    { key: 'totalLeaves', label: 'Total Leaves' },
+    { key: 'sickLeave', label: 'Sick Leave', icon: <LocalHospitalIcon /> },
+    { key: 'casualLeave', label: 'Casual Leave', icon: <BeachAccessIcon /> },
+    { key: 'earnedLeave', label: 'Earned Leave', icon: <EventAvailableIcon /> },
+    { key: 'paternityLeave', label: 'Paternity Leave', icon: <ChildCareIcon /> },
+    { key: 'maternityLeave', label: 'Maternity Leave', icon: <FamilyRestroomIcon /> },
+    { key: 'totalLeaves', label: 'Total Leaves', icon: <EventAvailableIcon /> },
   ];
 
   return (
-    <Paper sx={{ p: 4 }}>
-      <Typography variant="h5" gutterBottom align='center' sx={{ color: '#183c86',fontWeight: 'bold' }}>
-        Leave Balance
-      </Typography>
+    <Paper sx={{ p: 4, borderRadius: 4, boxShadow: 4 }}>
+      <Box
+        sx={{
+          background: 'linear-gradient(to right, #183c86, #5c6bc0)',
+          borderRadius: 2,
+          p: 2,
+          mb: 3,
+        }}
+      >
+        <Typography
+          variant="h5"
+          align="center"
+          sx={{ color: '#fff', fontWeight: 'bold' }}
+        >
+          Leave Balance Overview
+        </Typography>
+      </Box>
+
       {loading ? (
-        <CircularProgress />
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <CircularProgress />
+        </Box>
       ) : balanceData ? (
-        <Grid container spacing={2}>
-          {leaveTypes.map(({ key, label }) => (
+        <Grid container spacing={5}>
+          {leaveTypes.map(({ key, label, icon }) => (
             <Grid item xs={12} sm={6} md={4} key={key}>
               <Box
                 sx={{
-                  border: '1px solid #ccc',
-                  borderRadius: 2,
-                  p: 2,
+                  border: '1px solid #e0e0e0',
+                  borderRadius: 3,
+                  p: 3,
                   textAlign: 'center',
-                  backgroundColor: '#f9f9f9',
-                  boxShadow: 1,
+                  backgroundColor: '#f5f5f5',
+                  boxShadow: 2,
+                  transition: 'transform 0.2s ease-in-out',
+                  '&:hover': {
+                    transform: 'scale(1.03)',
+                    boxShadow: 4,
+                  },
                 }}
               >
+                <Avatar
+                  sx={{
+                    bgcolor: '#183c86',
+                    mx: 'auto',
+                    mb: 1,
+                    width: 40,
+                    height: 40,
+                  }}
+                >
+                  {icon}
+                </Avatar>
                 <Typography variant="subtitle1" fontWeight="bold">
                   {label}
                 </Typography>
@@ -69,7 +107,7 @@ const UserLeaveBalance = () => {
           ))}
         </Grid>
       ) : (
-        <Typography>No leave balance data available.</Typography>
+        <Typography align="center">No leave balance data available.</Typography>
       )}
     </Paper>
   );

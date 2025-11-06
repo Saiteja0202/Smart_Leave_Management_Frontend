@@ -10,7 +10,12 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  Grid,
+  Avatar,
+  Divider,
+  Tooltip,
 } from '@mui/material';
+import { Edit, Delete, LockReset } from '@mui/icons-material';
 import Swal from 'sweetalert2';
 import {
   getUserDetails,
@@ -28,6 +33,7 @@ const UserProfile = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [openEmailDialog, setOpenEmailDialog] = useState(false);
   const [openOtpDialog, setOpenOtpDialog] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
   const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
@@ -39,6 +45,7 @@ const UserProfile = () => {
   const userId = sessionStorage.getItem('userId');
   const navigate = useNavigate();
 
+  // ✅ Fetch User Details
   const fetchUser = async () => {
     try {
       const res = await getUserDetails(userId);
@@ -52,6 +59,7 @@ const UserProfile = () => {
     fetchUser();
   }, [userId]);
 
+  // ✅ Profile Edit
   const handleOpenDialog = () => {
     setEditData(user);
     setOpenDialog(true);
@@ -73,50 +81,60 @@ const UserProfile = () => {
     }
   };
 
+  // ✅ Password Change
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
     setPasswordData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // ✅ Send OTP
   const handleEmailSubmit = async () => {
     if (!email) {
       Swal.fire('Error', 'Please enter your email', 'error');
       return;
     }
-
+ 
+    setOtpLoading(true);
     try {
-      await generateOtpForPassword(email);
+      await generateOtpForPassword({ email });
       Swal.fire('OTP Sent', 'Check your email for the OTP', 'success');
       setOpenEmailDialog(false);
       setOpenOtpDialog(true);
     } catch {
       Swal.fire('Error', 'Failed to generate OTP', 'error');
+    } finally {
+      setOtpLoading(false);
     }
   };
-
+ 
+ 
   const handleOtpSubmit = async () => {
     if (!otp) {
       Swal.fire('Error', 'Please enter the OTP', 'error');
       return;
     }
-
+ 
+    setOtpLoading(true);
     try {
-      await verifyOtpForPassword(otp);
+      await verifyOtpForPassword({ otp });
       Swal.fire('Verified', 'OTP verified successfully', 'success');
       setOpenOtpDialog(false);
       setOpenPasswordDialog(true);
     } catch {
       Swal.fire('Error', 'Invalid OTP', 'error');
+    } finally {
+      setOtpLoading(false);
     }
   };
+ 
 
+  // ✅ Update Password
   const handlePasswordUpdate = async () => {
     const { oldPassword, newPassword } = passwordData;
     if (!oldPassword || !newPassword) {
       Swal.fire('Error', 'Please fill in both password fields', 'error');
       return;
     }
-
     try {
       await updatePassword(userId, passwordData);
       Swal.fire('Success', 'Password updated successfully', 'success');
@@ -127,6 +145,7 @@ const UserProfile = () => {
     }
   };
 
+  // ✅ Delete Account
   const handleDelete = async () => {
     const confirm = await Swal.fire({
       title: 'Are you sure?',
@@ -148,32 +167,118 @@ const UserProfile = () => {
     }
   };
 
-  return (
-    <Paper sx={{ p: 4 }}>
-      <Typography variant="h5" gutterBottom align='center' sx={{ color: '#183c86',fontWeight: 'bold' }}>User Profile</Typography>
-      {!user ? (
+  if (!user) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
         <CircularProgress />
-      ) : (
-        <Box>
-          <Typography>Name: {user.firstName} {user.lastName}</Typography>
-          <Typography>Email: {user.email}</Typography>
-          <Typography>Username: {user.userName}</Typography>
-          <Typography>Phone: {user.phoneNumber}</Typography>
-          <Typography>Gender: {user.gender}</Typography>
-          <Typography>Country: {user.countryName}</Typography>
-          <Typography>Address: {user.address}</Typography>
+      </Box>
+    );
+  }
 
-          <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-            <Button variant="contained" onClick={handleOpenDialog}>Update Profile</Button>
-            <Button variant="outlined" onClick={() => setOpenEmailDialog(true)}>Change Password</Button>
-            <Button variant="outlined" color="error" onClick={handleDelete}>Delete Account</Button>
-          </Box>
-        </Box>
-      )}
+  const firstLetter = user.firstName?.charAt(0)?.toUpperCase() || 'U';
 
-      {/* Update Profile Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Update Profile</DialogTitle>
+  // ✅ UI Layout
+  return (
+    <Paper
+      elevation={3}
+      sx={{
+        p: 4,
+        borderRadius: 4,
+        background: 'linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%)',
+        boxShadow: '0px 4px 15px rgba(0,0,0,0.08)',
+        animation: 'fadeIn 0.6s ease-in-out',
+        '@keyframes fadeIn': {
+          from: { opacity: 0, transform: 'translateY(15px)' },
+          to: { opacity: 1, transform: 'translateY(0)' },
+        },
+      }}
+    >
+      <Box sx={{ textAlign: 'center', mb: 3 }}>
+        <Avatar
+          sx={{
+            bgcolor: '#0288d1',
+            width: 80,
+            height: 80,
+            mx: 'auto',
+            mb: 1,
+            fontSize: 32,
+          }}
+        >
+          {firstLetter}
+        </Avatar>
+        <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#183c86' }}>
+          {user.firstName} {user.lastName}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {user.userName}
+        </Typography>
+      </Box>
+
+      <Divider sx={{ my: 3 }} />
+
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <Typography><strong>Email:</strong> {user.email}</Typography>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Typography><strong>Phone:</strong> {user.phoneNumber}</Typography>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Typography><strong>Gender:</strong> {user.gender}</Typography>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Typography><strong>Country:</strong> {user.countryName}</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Typography><strong>Address:</strong> {user.address}</Typography>
+        </Grid>
+      </Grid>
+
+      {/* 🔘 Action Buttons */}
+      <Box
+        sx={{
+          mt: 4,
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 2,
+          justifyContent: 'center',
+        }}
+      >
+        <Tooltip title="Edit Profile">
+          <Button
+            variant="contained"
+            startIcon={<Edit />}
+            onClick={handleOpenDialog}
+          >
+            Update Profile
+          </Button>
+        </Tooltip>
+
+        <Tooltip title="Change Password">
+          <Button
+            variant="outlined"
+            startIcon={<LockReset />}
+            onClick={() => setOpenEmailDialog(true)}
+          >
+            Change Password
+          </Button>
+        </Tooltip>
+
+        <Tooltip title="Delete Account">
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<Delete />}
+            onClick={handleDelete}
+          >
+            Delete Account
+          </Button>
+        </Tooltip>
+      </Box>
+
+      {/* ✏️ Edit Profile Dialog */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth>
+        <DialogTitle>Edit Profile</DialogTitle>
         <DialogContent>
           <TextField fullWidth label="First Name" name="firstName" value={editData.firstName || ''} onChange={handleChange} margin="normal" />
           <TextField fullWidth label="Last Name" name="lastName" value={editData.lastName || ''} onChange={handleChange} margin="normal" />
@@ -187,7 +292,7 @@ const UserProfile = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Email Dialog */}
+      {/* ✉️ Email Dialog */}
       <Dialog open={openEmailDialog} onClose={() => setOpenEmailDialog(false)}>
         <DialogTitle>Enter Email to Receive OTP</DialogTitle>
         <DialogContent>
@@ -202,11 +307,14 @@ const UserProfile = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenEmailDialog(false)}>Cancel</Button>
-          <Button onClick={handleEmailSubmit} variant="contained">Send OTP</Button>
+          <Button onClick={handleEmailSubmit} variant="contained" disabled={otpLoading}>
+  {otpLoading ? <CircularProgress size={24} color="inherit" /> : 'Send OTP'}
+</Button>
+ 
         </DialogActions>
       </Dialog>
 
-      {/* OTP Dialog */}
+      {/* 🔢 OTP Dialog */}
       <Dialog open={openOtpDialog} onClose={() => setOpenOtpDialog(false)}>
         <DialogTitle>Enter OTP</DialogTitle>
         <DialogContent>
@@ -220,11 +328,14 @@ const UserProfile = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenOtpDialog(false)}>Cancel</Button>
-          <Button onClick={handleOtpSubmit} variant="contained">Verify OTP</Button>
+          <Button onClick={handleOtpSubmit} variant="contained" disabled={otpLoading}>
+  {otpLoading ? <CircularProgress size={24} color="inherit" /> : 'Verify OTP'}
+</Button>
+ 
         </DialogActions>
       </Dialog>
 
-      {/* Password Dialog */}
+      {/* 🔐 Password Dialog */}
       <Dialog open={openPasswordDialog} onClose={() => setOpenPasswordDialog(false)}>
         <DialogTitle>Change Password</DialogTitle>
         <DialogContent>

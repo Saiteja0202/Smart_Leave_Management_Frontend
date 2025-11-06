@@ -54,7 +54,11 @@ const AdminLeaveRequests = () => {
       return <Chip label="Approved" color="success" />;
     } else if (status === 'REJECTED') {
       return <Chip label="Rejected" color="error" />;
-    } else {
+    }
+    else if (status === 'CANCELED') {
+      return <Chip label="Canceled" color="warning" />;
+    }
+    else {
       return <Chip label="Pending" color="default" />;
     }
   };

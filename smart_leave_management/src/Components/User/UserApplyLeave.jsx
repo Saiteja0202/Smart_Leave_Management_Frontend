@@ -131,9 +131,22 @@ const UserApplyLeave = () => {
 
   return (
     <Paper sx={{ p: 4 }}>
-      <Typography variant="h5" gutterBottom align='center' sx={{ color: '#183c86',fontWeight: 'bold' }}>
-        Apply for Leave
-      </Typography>
+      <Box
+        sx={{
+          background: 'linear-gradient(to right, #183c86, #5c6bc0)',
+          borderRadius: 2,
+          p: 2,
+          mb: 3,
+        }}
+      >
+      <Typography
+        variant="h5"
+        align="center"
+        gutterBottom
+        sx={{ color: '#fff', fontWeight: 'bold' }}
+      >
+        Apply for leave
+      </Typography></Box>
       <form onSubmit={handleSubmit}>
         <TextField
           select

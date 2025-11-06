@@ -12,8 +12,13 @@ import {
   Link,
   useMediaQuery,
   useTheme,
+  IconButton,
+  InputAdornment,
 } from '@mui/material';
 import { logout } from '../ApiCenter/AuthUtils'; 
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 const AdminLogin = () => {
   const [loginDetails, setLoginDetails] = useState({
@@ -21,6 +26,7 @@ const AdminLogin = () => {
     password: '',
   });
 
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -30,7 +36,6 @@ const AdminLogin = () => {
   useEffect(() => {
     logout();
   }, []);
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -58,7 +63,6 @@ const AdminLogin = () => {
         title: 'Login Successful',
         text: 'Welcome to the Admin Dashboard!',
         confirmButtonColor: '#3085d6',
-        
       });
 
       navigate('/admin-dashboard');
@@ -75,6 +79,10 @@ const AdminLogin = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
   };
 
   return (
@@ -98,7 +106,7 @@ const AdminLogin = () => {
             backgroundColor: '#fff',
           }}
         >
-          <Typography variant={isMobile ? 'h5' : 'h4'} align="center" gutterBottom sx={{ color: '#183c86',fontWeight: 'bold' }}>
+          <Typography variant={isMobile ? 'h5' : 'h4'} align="center" gutterBottom sx={{ color: '#183c86', fontWeight: 'bold' }}>
             Admin Login
           </Typography>
           <form onSubmit={handleSubmit}>
@@ -115,11 +123,20 @@ const AdminLogin = () => {
               fullWidth
               label="Password"
               name="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={loginDetails.password}
               onChange={handleChange}
               margin="normal"
               required
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={togglePasswordVisibility} edge="end">
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
             <Button
               fullWidth
@@ -133,15 +150,20 @@ const AdminLogin = () => {
               {loading ? <CircularProgress size={24} /> : 'Login'}
             </Button>
           </form>
-          <Typography variant="body2" align="center" sx={{ mt: 2 }}>
-            Not registered?{' '}
-            <Link
-              component="button"
-              variant="body2"
-              onClick={() => navigate('/admin-register')}
-            >
-              Create an account
+          <Typography align="center" sx={{ mt: 2 }}>
+            Don't have an account?{' '}
+            <Link href="/admin-register" underline="hover">
+              Register here
             </Link>
+          </Typography>
+          <Typography align="center" sx={{ mt: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              href="/"
+            >
+              Back to Home
+            </Button>
           </Typography>
         </Box>
       </Box>

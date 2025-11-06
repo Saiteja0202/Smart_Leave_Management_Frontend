@@ -124,7 +124,7 @@ const AdminAddRolePolicies = () => {
             </Select>
           </FormControl>
 
-          {['sickLeave', 'earnedLeave', 'casualLeave', 'paternityLeave', 'maternityLeave', 'lossOfPay'].map((field) => (
+          {['sickLeave', 'earnedLeave', 'casualLeave', 'paternityLeave', 'maternityLeave'].map((field) => (
             <TextField
               key={field}
               fullWidth
@@ -161,7 +161,7 @@ const AdminAddRolePolicies = () => {
                   <TableCell align="right">Casual</TableCell>
                   <TableCell align="right">Paternity</TableCell>
                   <TableCell align="right">Maternity</TableCell>
-                  <TableCell align="right">Loss of Pay</TableCell>
+                  {/* <TableCell align="right">Loss of Pay</TableCell> */}
                   <TableCell align="right"><strong>Total</strong></TableCell>
                 </TableRow>
               </TableHead>
@@ -174,7 +174,7 @@ const AdminAddRolePolicies = () => {
                     <TableCell align="right">{policy.casualLeave}</TableCell>
                     <TableCell align="right">{policy.paternityLeave}</TableCell>
                     <TableCell align="right">{policy.maternityLeave}</TableCell>
-                    <TableCell align="right">{policy.lossOfPay}</TableCell>
+                    {/* <TableCell align="right">{policy.lossOfPay}</TableCell> */}
                     <TableCell align="right"><strong>{policy.totalLeaves}</strong></TableCell>
                   </TableRow>
                 ))}

@@ -20,7 +20,7 @@ import UserLeaveRequests from './Components/User/UserLeaveRequests';
 import UserHolidays from './Components/User/UserHolidays';
 import UserApplyLeave from './Components/User/UserApplyLeave';
 import UserApproval from './Components/User/UserApprovals'; 
-
+import AdminRegistartionHistory from  './Components/Admin/AdminRegistrationHistory';
 import NotFound from './Components/Others/NotFound';
 
 import AdminLeaveRequests from './Components/Admin/AdminLeaveRequests';
@@ -51,6 +51,7 @@ const AppRoutes = () => {
         <Route path="users" element={<AdminUsers />} />
         <Route path="leave-requests" element={<AdminLeaveRequests />} /> 
         <Route path="reports" element={<AdminReports />} />
+        <Route path="registration-history" element={<AdminRegistartionHistory />} />
       </Route>
 
       <Route

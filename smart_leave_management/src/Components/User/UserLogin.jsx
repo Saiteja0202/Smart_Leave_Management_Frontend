@@ -17,6 +17,7 @@ import {
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../ApiCenter/AuthUtils';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {
   loginUser,
   generateOtpForUsername,
@@ -25,6 +26,12 @@ import {
   verifyOtpForPassword,
   updateNewPassword,
 } from '../ApiCenter/UserApi';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+
+
 
 const UserLogin = () => {
   const [formData, setFormData] = useState({ userName: '', password: '' });
@@ -37,7 +44,8 @@ const UserLogin = () => {
   const [showNewPasswordDialog, setShowNewPasswordDialog] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [verifiedUserId, setVerifiedUserId] = useState(null);
-
+  const [showPassword, setShowPassword] = useState(false);
+  const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
@@ -196,15 +204,25 @@ const UserLogin = () => {
               required
             />
             <TextField
-              fullWidth
-              label="Password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              margin="normal"
-              required
-            />
+  fullWidth
+  label="Password"
+  name="password"
+  type={showPassword ? 'text' : 'password'}
+  value={formData.password}
+  onChange={handleChange}
+  margin="normal"
+  required
+  InputProps={{
+    endAdornment: (
+      <InputAdornment position="end">
+        <IconButton onClick={togglePasswordVisibility} edge="end">
+          {showPassword ? <VisibilityOff /> : <Visibility />}
+        </IconButton>
+      </InputAdornment>
+    ),
+  }}
+/>
+
             <Button
               fullWidth
               type="submit"
@@ -234,6 +252,15 @@ const UserLogin = () => {
               Register here
             </Link>
           </Typography>
+          <Typography align="center" sx={{ mt: 2 }}>
+  <Button
+    variant="outlined"
+    startIcon={<ArrowBackIcon />}
+    href="/"
+  >
+    Back to Home
+  </Button>
+</Typography>
         </Box>
       </Box>
 

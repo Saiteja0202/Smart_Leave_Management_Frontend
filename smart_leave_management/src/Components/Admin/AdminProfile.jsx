@@ -14,6 +14,7 @@ import {
   TextField,
   IconButton,
   Divider,
+  Avatar,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import Swal from 'sweetalert2';
@@ -62,7 +63,7 @@ const AdminProfile = () => {
       Swal.fire({
         icon: 'success',
         title: 'Profile Updated',
-        text: 'Your changes have been saved.',
+        text: 'Your changes have been saved successfully.',
         timer: 2000,
         showConfirmButton: false,
       });
@@ -87,19 +88,66 @@ const AdminProfile = () => {
     );
   }
 
+  const firstLetter = adminData?.firstName?.charAt(0)?.toUpperCase() || 'A';
+  const fullName = `${adminData.firstName || ''} ${adminData.lastName || ''}`.trim();
+
   return (
     <Container maxWidth="md">
-      <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h5" align='center' sx={{ color: '#183c86',fontWeight: 'bold' }}>Admin Profile</Typography>
-          <IconButton onClick={() => setOpen(true)} color="primary">
+      <Paper
+        elevation={4}
+        sx={{
+          p: 4,
+          mt: 5,
+          borderRadius: 3,
+          boxShadow: '0px 3px 8px rgba(0,0,0,0.1)',
+          backgroundColor: '#fff',
+        }}
+      >
+        {/* 🧑‍💼 Profile Header */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+            mb: 3,
+          }}
+        >
+          <Avatar
+            sx={{
+              bgcolor: '#0288d1',
+              width: 80,
+              height: 80,
+              fontSize: 32,
+              mb: 1,
+            }}
+          >
+            {firstLetter}
+          </Avatar>
+
+          <Typography variant="h5" sx={{ color: '#183c86', fontWeight: 'bold' }}>
+            {fullName || 'Admin'}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Administrator
+          </Typography>
+
+          <IconButton
+            color="primary"
+            sx={{ mt: 1 }}
+            onClick={() => setOpen(true)}
+            title="Edit Profile"
+          >
             <EditIcon />
           </IconButton>
         </Box>
 
         <Divider sx={{ my: 2 }} />
 
-        <Typography variant="subtitle1" gutterBottom>Personal Information</Typography>
+        {/* 👤 Personal Info */}
+        <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', color: '#0288d1' }}>
+          Personal Information
+        </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             <Typography><strong>First Name:</strong> {adminData.firstName}</Typography>
@@ -112,7 +160,10 @@ const AdminProfile = () => {
           </Grid>
         </Grid>
 
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3 }}>Contact Information</Typography>
+        {/* 📞 Contact Info */}
+        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold', color: '#0288d1' }}>
+          Contact Information
+        </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             <Typography><strong>Email:</strong> {adminData.email}</Typography>
@@ -125,7 +176,10 @@ const AdminProfile = () => {
           </Grid>
         </Grid>
 
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3 }}>Account</Typography>
+        {/* 🔐 Account Info */}
+        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold', color: '#0288d1' }}>
+          Account Details
+        </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             <Typography><strong>Username:</strong> {adminData.userName}</Typography>
@@ -133,9 +187,9 @@ const AdminProfile = () => {
         </Grid>
       </Paper>
 
-      {/* Update Dialog */}
+      {/* ✏️ Edit Dialog */}
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Update Profile</DialogTitle>
+        <DialogTitle>Edit Profile</DialogTitle>
         <DialogContent>
           <TextField fullWidth margin="normal" label="Username" name="userName" value={editData.userName || ''} onChange={handleChange} />
           <TextField fullWidth margin="normal" label="Email" name="email" type="email" value={editData.email || ''} onChange={handleChange} />
@@ -147,7 +201,7 @@ const AdminProfile = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleUpdate}>Save</Button>
+          <Button variant="contained" onClick={handleUpdate}>Save Changes</Button>
         </DialogActions>
       </Dialog>
     </Container>

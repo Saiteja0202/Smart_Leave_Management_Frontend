@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
-  TextField,
   Typography,
   CircularProgress,
   Container,
@@ -11,6 +10,7 @@ import {
   ListItem,
   ListItemText,
   Divider,
+  TextField,
 } from '@mui/material';
 import Swal from 'sweetalert2';
 import {
@@ -98,60 +98,132 @@ const AdminAddCalendar = () => {
 
   return (
     <Container maxWidth="md">
-      <Paper sx={{ p: 4, mt: 4 }}>
-      <Typography variant="h5" gutterBottom align='center' sx={{ color: '#183c86',fontWeight: 'bold' }}>
-  Add Holidays to Calendar
-  <a
-    href="https://docs.google.com/spreadsheets/d/1nkOpL4L6J9mDw2tLaezeO8KZnXxwhauCed1JG5u6bq8/edit?gid=0#gid=0"
-    target="_blank"
-    rel="noopener noreferrer"
-    style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: '#1976d2' }}
-  >
-    <CalendarTodayIcon fontSize="small" sx={{ mr: 0.5 }} />
-    Calendar
-  </a>
-</Typography>
+      <Paper
+        sx={{
+          p: 4,
+          mt: 4,
+          boxShadow: 4,
+          borderRadius: 3,
+          transition: 'all 0.3s ease',
+        }}
+      >
+        <Box
+          sx={{
+            background: 'linear-gradient(to right, #183c86, #5c6bc0)',
+            borderRadius: 2,
+            p: 2,
+            mb: 3,
+          }}
+        >
+          <Typography
+            variant="h5"
+            align="center"
+            sx={{ color: '#fff', fontWeight: 'bold' }}
+          >
+            Add Holidays to Calendar
+          </Typography>
+        </Box>
 
-        
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            mb: 3,
+          }}
+        >
+          <a
+            href="https://docs.google.com/spreadsheets/d/1nkOpL4L6J9mDw2tLaezeO8KZnXxwhauCed1JG5u6bq8/edit?gid=0#gid=0"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              textDecoration: 'none',
+              color: '#1976d2',
+              fontWeight: '500',
+            }}
+          >
+            <CalendarTodayIcon fontSize="small" sx={{ mr: 1 }} />
+            View Calendar Template
+          </a>
+        </Box>
 
-        <Box sx={{ mt: 4, textAlign: 'center' }}>
-          <Button variant="outlined" onClick={handleUpdate} disabled={loading}>
-            {loading ? <CircularProgress size={24} /> : 'Update Calendar'}
+       
+        <Box sx={{ mt: 2, textAlign: 'center' }}>
+          <Button
+            variant="contained"
+            onClick={handleUpdate}
+            disabled={loading}
+            sx={{
+              background: 'linear-gradient(to right, #183c86, #5c6bc0)',
+              color: '#fff',
+              px: 4,
+              py: 1,
+              fontWeight: 600,
+              borderRadius: 2,
+              textTransform: 'none',
+              '&:hover': { opacity: 0.9 },
+            }}
+          >
+            {loading ? <CircularProgress size={24} color="inherit" /> : 'Update Calendar'}
           </Button>
         </Box>
 
-        <Box sx={{ mt: 4 }}>
-          <Typography variant="h6" gutterBottom>
-            Holiday List
-          </Typography>
-          {holidayLoading ? (
+        <Divider sx={{ my: 4 }} />
+
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: 'bold', color: '#183c86', mb: 2 }}
+        >
+          Holiday List
+        </Typography>
+
+        {holidayLoading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
             <CircularProgress />
-          ) : Object.keys(groupedHolidays).length === 0 ? (
-            <Typography>No holidays found.</Typography>
-          ) : (
-            Object.entries(groupedHolidays).map(([group, items]) => (
-              <Box key={group} sx={{ mb: 3 }}>
-                <Typography variant="subtitle1" gutterBottom>
-                  {group}
-                </Typography>
-                <List>
-                  {items.map((holiday) => (
-                    <ListItem key={holiday.holidayId} divider>
-                      <ListItemText
-                        primary={holiday.holidayName}
-                        secondary={`Date: ${holiday.holidayDate} (${holiday.holidayDay})`}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </Box>
-            ))
-          )}
-        </Box>
-
-        <Divider sx={{ my: 3 }} />
-
-        
+          </Box>
+        ) : Object.keys(groupedHolidays).length === 0 ? (
+          <Typography align="center" color="text.secondary">
+            No holidays found.
+          </Typography>
+        ) : (
+          Object.entries(groupedHolidays).map(([group, items]) => (
+            <Box
+              key={group}
+              sx={{
+                mb: 3,
+                borderRadius: 2,
+                p: 2,
+                backgroundColor: '#f9f9fc',
+                boxShadow: 1,
+                transition: '0.3s',
+                '&:hover': { boxShadow: 3 },
+              }}
+            >
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: '#183c86',
+                  fontWeight: 'bold',
+                  mb: 1,
+                }}
+              >
+                {group}
+              </Typography>
+              <List>
+                {items.map((holiday) => (
+                  <ListItem key={holiday.holidayId} divider>
+                    <ListItemText
+                      primary={holiday.holidayName}
+                      secondary={`Date: ${holiday.holidayDate} (${holiday.holidayDay})`}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+          ))
+        )}
       </Paper>
     </Container>
   );

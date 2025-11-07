@@ -15,6 +15,8 @@ import {
   ListItem,
   ListItemText,
   Divider,
+  Card,
+  CardContent,
 } from '@mui/material';
 import Swal from 'sweetalert2';
 import { addNewRole, getAllRoles } from '../ApiCenter/AdminApi';
@@ -76,18 +78,53 @@ const AdminAddRoles = () => {
   const existingRoleNames = existingRoles.map((r) => r.roleName);
 
   return (
-    <Container maxWidth="sm">
-      <Paper sx={{ p: 4, mt: 4 }}>
-        <Typography variant="h5" gutterBottom align='center' sx={{ color: '#183c86',fontWeight: 'bold' }}>
-          Add New Role
-        </Typography>
-        <form onSubmit={handleSubmit}>
-          <FormControl fullWidth margin="normal">
+    <Container maxWidth="md">
+      <Paper
+        elevation={4}
+        sx={{
+          p: 4,
+          mt: 5,
+          borderRadius: 4,
+          background: 'linear-gradient(to right, #f8f9fc, #ffffff)',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+        }}
+      >
+        <Box
+          sx={{
+            background: 'linear-gradient(to right, #183c86, #5c6bc0)',
+            borderRadius: 2,
+            p: 2,
+            mb: 3,
+          }}
+        >
+          <Typography
+            variant="h5"
+            align="center"
+            sx={{ color: '#fff', fontWeight: 'bold' }}
+          >
+            Add New Role
+          </Typography>
+        </Box>
+
+
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            backgroundColor: '#fafbff',
+            borderRadius: 2,
+            p: 3,
+            boxShadow: 'inset 0 0 8px rgba(0,0,0,0.05)',
+          }}
+        >
+          <FormControl fullWidth required>
             <InputLabel>Select Role</InputLabel>
             <Select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
-              required
               label="Select Role"
             >
               {predefinedRoles.map((role) => (
@@ -104,44 +141,86 @@ const AdminAddRoles = () => {
 
           <TextField
             fullWidth
-            margin="normal"
             label="Description"
             value={customDescription}
             onChange={(e) => setCustomDescription(e.target.value)}
             placeholder="Optional: Customize role description"
+            multiline
+            rows={2}
           />
 
           <Button
             type="submit"
             variant="contained"
-            fullWidth
-            sx={{ mt: 2 }}
             disabled={loading || !selectedRole}
+            sx={{
+              mt: 2,
+              py: 1.3,
+              backgroundColor: '#183c86',
+              fontWeight: 'bold',
+              letterSpacing: 0.5,
+              '&:hover': {
+                backgroundColor: '#102a60',
+                transform: 'scale(1.02)',
+                transition: '0.3s',
+              },
+            }}
           >
-            {loading ? <CircularProgress size={24} /> : 'Add Role'}
+            {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Add Role'}
           </Button>
-        </form>
+        </Box>
 
         <Divider sx={{ my: 4 }} />
 
-        <Typography variant="h6" gutterBottom>
+        <Typography
+          variant="h6"
+          gutterBottom
+          sx={{
+            color: '#183c86',
+            fontWeight: 'bold',
+            mb: 2,
+          }}
+        >
           Existing Roles
         </Typography>
+
         {fetchingRoles ? (
-          <CircularProgress />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <CircularProgress />
+          </Box>
         ) : existingRoles.length === 0 ? (
-          <Typography>No roles found.</Typography>
+          <Typography sx={{ textAlign: 'center', color: 'text.secondary' }}>
+            No roles found.
+          </Typography>
         ) : (
-          <List>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+              gap: 2,
+            }}
+          >
             {existingRoles.map((role) => (
-              <ListItem key={role.roleId} divider>
-                <ListItemText
-                  primary={role.roleName}
-                  secondary={role.description}
-                />
-              </ListItem>
+              <Card
+                key={role.roleId}
+                sx={{
+                  borderRadius: 3,
+                  boxShadow: '0 3px 8px rgba(0,0,0,0.08)',
+                  transition: '0.3s',
+                  '&:hover': { transform: 'scale(1.03)', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' },
+                }}
+              >
+                <CardContent>
+                  <Typography variant="subtitle1" fontWeight="bold" color="#183c86">
+                    {role.roleName}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {role.description}
+                  </Typography>
+                </CardContent>
+              </Card>
             ))}
-          </List>
+          </Box>
         )}
       </Paper>
     </Container>

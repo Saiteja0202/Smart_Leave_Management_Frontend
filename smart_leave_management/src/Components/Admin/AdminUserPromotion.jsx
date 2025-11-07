@@ -14,6 +14,8 @@ import {
   ListItem,
   ListItemText,
   Button,
+  Box,
+  Divider,
 } from '@mui/material';
 import Swal from 'sweetalert2';
 import { getAllUsers, promoteUser } from '../ApiCenter/AdminApi';
@@ -78,70 +80,179 @@ const AdminUserPromotion = () => {
   };
 
   return (
-    <Container maxWidth="md">
-      <Paper sx={{ p: 4, mt: 4 }}>
-        <Typography variant="h5" gutterBottom align='center' sx={{ color: '#183c86',fontWeight: 'bold' }}>All Users</Typography>
+    <Container maxWidth="md" sx={{ mt: 4, mb: 6 }}>
+      {/* Header Gradient Bar */}
+      <Box
+        sx={{
+          background: 'linear-gradient(to right, #183c86, #5c6bc0)',
+          borderRadius: 2,
+          p: 2,
+          mb: 3,
+          boxShadow: 3,
+        }}
+      >
+        <Typography
+          variant="h5"
+          align="center"
+          sx={{
+            fontWeight: 'bold',
+            color: 'white',
+            letterSpacing: 1,
+          }}
+        >
+          User Promotion Panel
+        </Typography>
+      </Box>
+
+      <Paper
+        elevation={4}
+        sx={{
+          p: 4,
+          borderRadius: 3,
+          backgroundColor: '#fafafa',
+        }}
+      >
+        <Typography
+          variant="h6"
+          gutterBottom
+          align="center"
+          sx={{ color: '#183c86', fontWeight: 'bold' }}
+        >
+          All Users
+        </Typography>
+
+        <Divider sx={{ mb: 2 }} />
+
         {loadingUsers ? (
-          <CircularProgress />
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="150px">
+            <CircularProgress />
+          </Box>
         ) : users.length === 0 ? (
-          <Typography>No users found.</Typography>
+          <Typography align="center" sx={{ color: 'gray' }}>
+            No users found.
+          </Typography>
         ) : (
           <List>
             {users.map((user) => {
               const currentRole = user.role?.roleName || user.userRole;
               return (
-                <ListItem
+                <Paper
                   key={user.userId}
-                  divider
-                  secondaryAction={
-                    <Button
-                      variant="outlined"
-                      onClick={() => handlePromoteClick(user)}
-                      disabled={!getAvailableRoles(currentRole).length}
-                    >
-                      Promote
-                    </Button>
-                  }
+                  elevation={2}
+                  sx={{
+                    mb: 2,
+                    borderRadius: 2,
+                    p: 2,
+                    backgroundColor: '#fff',
+                    '&:hover': {
+                      boxShadow: 6,
+                      transform: 'scale(1.01)',
+                      transition: '0.2s ease-in-out',
+                    },
+                  }}
                 >
-                  <ListItemText
-                    primary={`${user.firstName} ${user.lastName} (ID: ${user.userId})`}
-                    secondary={
-                      <>
-                        Email: {user.email} | Role: {currentRole}
-                        <br />
-                        Country: {user.countryName} | Gender: {user.gender}
-                      </>
+                  <ListItem
+                    divider
+                    secondaryAction={
+                      <Button
+                        variant="contained"
+                        onClick={() => handlePromoteClick(user)}
+                        disabled={!getAvailableRoles(currentRole).length}
+                        sx={{
+                          background: 'linear-gradient(to right, #183c86, #5c6bc0)',
+                          color: 'white',
+                          '&:hover': {
+                            background: 'linear-gradient(to right, #5c6bc0, #183c86)',
+                          },
+                        }}
+                      >
+                        Promote
+                      </Button>
                     }
-                  />
-                </ListItem>
+                  >
+                    <ListItemText
+                      primary={
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#183c86' }}>
+                          {user.firstName} {user.lastName} (ID: {user.userId})
+                        </Typography>
+                      }
+                      secondary={
+                        <>
+                          <Typography variant="body2" color="text.secondary">
+                            Email: {user.email} | Role: {currentRole}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Country: {user.countryName} | Gender: {user.gender}
+                          </Typography>
+                        </>
+                      }
+                    />
+                  </ListItem>
+                </Paper>
               );
             })}
           </List>
         )}
       </Paper>
 
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-        <DialogTitle>Promote User</DialogTitle>
+      {/* Promotion Dialog */}
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            p: 2,
+            boxShadow: 8,
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 'bold', color: '#183c86' }}>Promote User</DialogTitle>
         <DialogContent>
-          <Typography gutterBottom>
-            Promote <strong>{selectedUser?.firstName} {selectedUser?.lastName}</strong> (ID: {selectedUser?.userId}) from <strong>{selectedUser?.role?.roleName || selectedUser?.userRole}</strong> to:
+          <Typography gutterBottom sx={{ mb: 2 }}>
+            Promote{' '}
+            <strong>
+              {selectedUser?.firstName} {selectedUser?.lastName}
+            </strong>{' '}
+            (ID: {selectedUser?.userId}) from{' '}
+            <strong>{selectedUser?.role?.roleName || selectedUser?.userRole}</strong> to:
           </Typography>
           <Select
             fullWidth
             value={newRole}
             onChange={(e) => setNewRole(e.target.value)}
             displayEmpty
+            sx={{
+              mt: 1,
+              borderRadius: 2,
+            }}
           >
-            <MenuItem value="" disabled>Select new role</MenuItem>
+            <MenuItem value="" disabled>
+              Select new role
+            </MenuItem>
             {getAvailableRoles(selectedUser?.role?.roleName || selectedUser?.userRole).map((role) => (
-              <MenuItem key={role} value={role}>{role}</MenuItem>
+              <MenuItem key={role} value={role}>
+                {role}
+              </MenuItem>
             ))}
           </Select>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDialogOpen(false)} disabled={loading}>Cancel</Button>
-          <Button onClick={handlePromoteConfirm} variant="contained" disabled={loading}>
-            {loading ? <CircularProgress size={20} /> : 'Confirm'}
+          <Button onClick={() => setDialogOpen(false)} disabled={loading} sx={{ color: '#5c6bc0' }}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handlePromoteConfirm}
+            variant="contained"
+            disabled={loading}
+            sx={{
+              background: 'linear-gradient(to right, #183c86, #5c6bc0)',
+              '&:hover': {
+                background: 'linear-gradient(to right, #5c6bc0, #183c86)',
+              },
+            }}
+          >
+            {loading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : 'Confirm'}
           </Button>
         </DialogActions>
       </Dialog>

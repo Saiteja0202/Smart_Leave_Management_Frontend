@@ -17,13 +17,15 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
+  Card,
+  CardContent,
 } from '@mui/material';
 import Swal from 'sweetalert2';
 import {
   addLeavePolicies,
   getAllLeavePolicies,
-  getAllRoles
+  getAllRoles,
 } from '../ApiCenter/AdminApi';
 
 const AdminAddRolePolicies = () => {
@@ -34,8 +36,8 @@ const AdminAddRolePolicies = () => {
     casualLeave: '',
     paternityLeave: '',
     maternityLeave: '',
-    lossOfPay: '',
   });
+
   const [loading, setLoading] = useState(false);
   const [roles, setRoles] = useState([]);
   const [usedRoles, setUsedRoles] = useState([]);
@@ -63,9 +65,7 @@ const AdminAddRolePolicies = () => {
   };
 
   useEffect(() => {
-    if (adminId) {
-      fetchData();
-    }
+    if (adminId) fetchData();
   }, [adminId]);
 
   const handleChange = (e) => {
@@ -78,7 +78,7 @@ const AdminAddRolePolicies = () => {
     setLoading(true);
     try {
       await addLeavePolicies(adminId, policyData);
-      Swal.fire('Success', 'Leave policy added', 'success');
+      Swal.fire('Success', 'Leave policy added successfully!', 'success');
       setPolicyData({
         role: '',
         sickLeave: '',
@@ -86,7 +86,6 @@ const AdminAddRolePolicies = () => {
         casualLeave: '',
         paternityLeave: '',
         maternityLeave: '',
-        lossOfPay: '',
       });
       await fetchData();
     } catch {
@@ -98,16 +97,53 @@ const AdminAddRolePolicies = () => {
 
   return (
     <Container maxWidth="md">
-      <Paper sx={{ p: 4, mt: 4 }}>
-        <Typography variant="h5" gutterBottom align='center' sx={{ color: '#183c86',fontWeight: 'bold' }}>Add Leave Policy</Typography>
-        <form onSubmit={handleSubmit}>
-          <FormControl fullWidth margin="normal">
+      <Paper
+        elevation={4}
+        sx={{
+          p: 4,
+          mt: 5,
+          borderRadius: 4,
+          background: 'linear-gradient(to right, #f8f9fc, #ffffff)',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+        }}
+      >
+        <Box
+          sx={{
+            background: 'linear-gradient(to right, #183c86, #5c6bc0)',
+            borderRadius: 2,
+            p: 2,
+            mb: 3,
+          }}
+        >
+          <Typography
+            variant="h5"
+            align="center"
+            sx={{ color: '#fff', fontWeight: 'bold' }}
+          >
+            Add Leave Policy
+          </Typography>
+        </Box>
+
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{
+            backgroundColor: '#fafbff',
+            borderRadius: 2,
+            p: 3,
+            boxShadow: 'inset 0 0 8px rgba(0,0,0,0.05)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+          }}
+        >
+          <FormControl fullWidth required>
             <InputLabel>Select Role</InputLabel>
             <Select
               name="role"
               value={policyData.role}
               onChange={handleChange}
-              required
+              label="Select Role"
             >
               {roles.map((role) => {
                 const isUsed = usedRoles.includes(role.roleName);
@@ -124,63 +160,121 @@ const AdminAddRolePolicies = () => {
             </Select>
           </FormControl>
 
-          {['sickLeave', 'earnedLeave', 'casualLeave', 'paternityLeave', 'maternityLeave'].map((field) => (
-            <TextField
-              key={field}
-              fullWidth
-              type="number"
-              label={field.replace(/([A-Z])/g, ' $1')}
-              name={field}
-              value={policyData[field]}
-              onChange={handleChange}
-              margin="normal"
-              required
-            />
-          ))}
+          {['sickLeave', 'earnedLeave', 'casualLeave', 'paternityLeave', 'maternityLeave'].map(
+            (field) => (
+              <TextField
+                key={field}
+                fullWidth
+                type="number"
+                label={field.replace(/([A-Z])/g, ' $1')}
+                name={field}
+                value={policyData[field]}
+                onChange={handleChange}
+                margin="normal"
+                required
+              />
+            )
+          )}
 
-          <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }} disabled={loading}>
-            {loading ? <CircularProgress size={24} /> : 'Add Policy'}
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            disabled={loading}
+            sx={{
+              mt: 2,
+              py: 1.3,
+              backgroundColor: '#183c86',
+              fontWeight: 'bold',
+              '&:hover': {
+                backgroundColor: '#102a60',
+                transform: 'scale(1.02)',
+                transition: '0.3s',
+              },
+            }}
+          >
+            {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Add Policy'}
           </Button>
-        </form>
+        </Box>
 
         <Divider sx={{ my: 4 }} />
 
-        <Typography variant="h6" gutterBottom>Existing Leave Policies</Typography>
+        <Typography
+          variant="h6"
+          gutterBottom
+          sx={{ color: '#183c86', fontWeight: 'bold', mb: 2 }}
+        >
+          Existing Leave Policies
+        </Typography>
+
         {fetching ? (
-          <CircularProgress />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+            <CircularProgress />
+          </Box>
         ) : leavePolicies.length === 0 ? (
-          <Typography>No leave policies found.</Typography>
+          <Typography sx={{ textAlign: 'center', color: 'text.secondary' }}>
+            No leave policies found.
+          </Typography>
         ) : (
-          <TableContainer component={Paper}>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Role</TableCell>
-                  <TableCell align="right">Sick</TableCell>
-                  <TableCell align="right">Earned</TableCell>
-                  <TableCell align="right">Casual</TableCell>
-                  <TableCell align="right">Paternity</TableCell>
-                  <TableCell align="right">Maternity</TableCell>
-                  {/* <TableCell align="right">Loss of Pay</TableCell> */}
-                  <TableCell align="right"><strong>Total</strong></TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {leavePolicies.map((policy) => (
-                  <TableRow key={policy.roleBasedLeaveId}>
-                    <TableCell>{policy.role}</TableCell>
-                    <TableCell align="right">{policy.sickLeave}</TableCell>
-                    <TableCell align="right">{policy.earnedLeave}</TableCell>
-                    <TableCell align="right">{policy.casualLeave}</TableCell>
-                    <TableCell align="right">{policy.paternityLeave}</TableCell>
-                    <TableCell align="right">{policy.maternityLeave}</TableCell>
-                    {/* <TableCell align="right">{policy.lossOfPay}</TableCell> */}
-                    <TableCell align="right"><strong>{policy.totalLeaves}</strong></TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <Card
+            sx={{
+              borderRadius: 3,
+              boxShadow: '0 3px 8px rgba(0,0,0,0.08)',
+              overflow: 'hidden',
+            }}
+          >
+            <CardContent sx={{ p: 0 }}>
+              <TableContainer component={Box}>
+                <Table size="small">
+                  <TableHead sx={{ backgroundColor: '#183c86' }}>
+                    <TableRow>
+                      {[
+                        'Role',
+                        'Sick',
+                        'Earned',
+                        'Casual',
+                        'Paternity',
+                        'Maternity',
+                        'Total',
+                      ].map((head) => (
+                        <TableCell
+                          key={head}
+                          sx={{ color: '#fff', fontWeight: 'bold', textAlign: 'center' }}
+                        >
+                          {head}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {leavePolicies.map((policy) => (
+                      <TableRow
+                        key={policy.roleBasedLeaveId}
+                        sx={{
+                          '&:hover': {
+                            backgroundColor: 'rgba(24,60,134,0.05)',
+                            transition: '0.2s',
+                          },
+                        }}
+                      >
+                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+                          {policy.role}
+                        </TableCell>
+                        <TableCell align="center">{policy.sickLeave}</TableCell>
+                        <TableCell align="center">{policy.earnedLeave}</TableCell>
+                        <TableCell align="center">{policy.casualLeave}</TableCell>
+                        <TableCell align="center">{policy.paternityLeave}</TableCell>
+                        <TableCell align="center">{policy.maternityLeave}</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold', color: '#183c86' }}>
+                          {policy.totalLeaves}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
         )}
       </Paper>
     </Container>

@@ -119,7 +119,7 @@ const AdminAddRoles = () => {
                 '&:hover': { transform: 'scale(1.03)', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' },
               }}>
                 <CardContent>
-                  <Typography variant="subtitle1" fontWeight="bold" color="#183c86">{roleName}</Typography>
+                  <Typography variant="subtitle1" fontWeight="bold" color="#183c86">{roleName.replace(/_/g, ' ')}</Typography>
                   <Typography variant="body2" color="text.secondary">{description}</Typography>
                 </CardContent>
               </Card>

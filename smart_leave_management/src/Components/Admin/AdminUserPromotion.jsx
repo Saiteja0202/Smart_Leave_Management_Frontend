@@ -165,7 +165,7 @@ const AdminUserPromotion = () => {
                     >
                       <ListItemText
                         primary={`${user.firstName} ${user.lastName} (ID: ${user.userId})`}
-                        secondary={`Email: ${user.email} | Role: ${currentRole} | Country: ${user.countryName} | Gender: ${user.gender}`}
+                        secondary={`Email: ${user.email} | Role: ${currentRole.replace(/_/g, ' ')} | Country: ${user.countryName} | Gender: ${user.gender}`}
                       />
                     </ListItem>
                   </Paper>
@@ -190,12 +190,12 @@ const AdminUserPromotion = () => {
         <DialogContent>
           <Typography gutterBottom>
             Promote <strong>{selectedUser?.firstName} {selectedUser?.lastName}</strong> from{' '}
-            <strong>{selectedUser?.role?.roleName || selectedUser?.userRole}</strong> to:
+            <strong>{selectedUser?.role?.roleName.replace(/_/g, ' ') || selectedUser?.userRole.replace(/_/g, ' ')}</strong> to:
           </Typography>
           <Select fullWidth value={newRole} onChange={(e) => setNewRole(e.target.value)} displayEmpty>
             <MenuItem value="" disabled>Select new role</MenuItem>
             {getAvailableRoles(selectedUser?.role?.roleName || selectedUser?.userRole).map((role) => (
-              <MenuItem key={role} value={role}>{role}</MenuItem>
+              <MenuItem key={role} value={role}>{role.replace(/_/g, ' ')}</MenuItem>
             ))}
           </Select>
         </DialogContent>

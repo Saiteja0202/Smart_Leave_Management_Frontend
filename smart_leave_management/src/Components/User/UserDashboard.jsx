@@ -24,6 +24,7 @@ import {
   PeopleAlt,
   Logout,
   Menu as MenuIcon,
+  Assessment,
 } from '@mui/icons-material';
 import { logout } from '../ApiCenter/AuthUtils';
 
@@ -47,7 +48,8 @@ const UserDashboard = () => {
   ];
 
   if (roleName === 'HR_MANAGER' || roleName === 'TEAM_MANAGER') {
-    navItems.push({ label: 'User Approvals', path: 'user-approvals', icon: <PeopleAlt /> });
+    navItems.push({ label: 'Leave Approvals', path: 'user-approvals', icon: <PeopleAlt /> });
+    navItems.push({ label: 'Team Leave Balance', path: 'user-all-leavebalance', icon: <Assessment /> });
   }
 
   const handleLogout = () => {

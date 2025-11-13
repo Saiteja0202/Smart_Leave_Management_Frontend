@@ -14,6 +14,10 @@ import {
   Avatar,
   Divider,
   Tooltip,
+  FormControl,      
+  InputLabel,     
+  Select,       
+  MenuItem 
 } from '@mui/material';
 import { Edit, Delete, LockReset } from '@mui/icons-material';
 import Swal from 'sweetalert2';
@@ -25,6 +29,7 @@ import {
   generateOtpForPassword,
   verifyOtpForPassword,
 } from '../ApiCenter/UserApi';
+import { getAllCities } from '../ApiCenter/UserApi';
 import { useNavigate } from 'react-router-dom';
 
 const UserProfile = () => {
@@ -37,6 +42,8 @@ const UserProfile = () => {
   const [otpLoading, setOtpLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
+  const [cities, setCities] = useState([]);
+  const [loadingCities, setLoadingCities] = useState(false);
   const [passwordData, setPasswordData] = useState({ oldPassword: '', newPassword: '' });
 
   const userId = sessionStorage.getItem('userId');
@@ -63,6 +70,31 @@ const UserProfile = () => {
     const { name, value } = e.target;
     setEditData((prev) => ({ ...prev, [name]: value }));
   };
+
+  useEffect(() => {
+    const country = editData.countryName || user?.countryName;
+    if (!country) return;
+  
+    const fetchCities = async () => {
+      setLoadingCities(true);
+      try {
+        const res = await getAllCities(country);
+        console.log('Fetched cities for:', country, res.data);
+        // Since API returns an array like ["Delhi", "Mumbai"], use it directly
+        setCities(res.data || []);
+      } catch (err) {
+        console.error('Failed to load cities:', err);
+        setCities([]);
+      } finally {
+        setLoadingCities(false);
+      }
+    };
+  
+    fetchCities();
+  }, [user?.countryName, editData.countryName]);
+  
+  
+  
 
   const handleUpdate = async () => {
     try {
@@ -191,7 +223,9 @@ const UserProfile = () => {
       ['Phone', user.phoneNumber],
       ['Gender', user.gender],
       ['Country', user.countryName],
+      ['City',user.cityName],
       ['Address', user.address],
+      
     ].map(([label, value], i) => (
       <Grid item xs={12} sm={i < 4 ? 6 : 12} key={label}>
         <Typography>
@@ -235,12 +269,39 @@ const UserProfile = () => {
               margin="normal"
             />
           ))}
+
+          {/* City Dropdown */}
+          {/* City Dropdown */}
+<TextField
+  fullWidth
+  select
+  label="City"
+  name="cityName"
+  value={editData.cityName || ''}
+  onChange={handleChange}
+  margin="normal"
+  required
+>
+  {loadingCities ? (
+    <MenuItem disabled>
+      <CircularProgress size={20} />
+    </MenuItem>
+  ) : (
+    cities.map((city) => (
+      <MenuItem key={city} value={city}>
+        {city}
+      </MenuItem>
+    ))
+  )}
+</TextField>
+
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
           <Button onClick={handleUpdate} variant="contained">Save</Button>
         </DialogActions>
       </Dialog>
+
 
       {/* Email Dialog */}
       <Dialog open={openEmailDialog} onClose={() => setOpenEmailDialog(false)}>

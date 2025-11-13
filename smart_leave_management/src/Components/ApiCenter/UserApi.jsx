@@ -30,6 +30,10 @@ export const verifyOtpForPassword = (otp) =>
 export const verifyOtpForUsername = (otp) =>
   axios.post(`${BASE_URL}/users/forgot-username/verify-otp`, otp);
 
+export const getAllCities = (countryName) =>
+  axios.get(`${BASE_URL}/users/get-all-cities/${countryName}`);
+
+
 export const updatePassword = (userId, updatePasswordDetails) =>
   axiosInstance.put(`/users/update-password/${userId}`, updatePasswordDetails );
 
@@ -56,6 +60,9 @@ export const getUserLeaveRequests = (userId) =>
 
 export const getAllUserLeaveRequests = (userId) =>
   axiosInstance.get(`/users/get-all-leave-requests/${userId}`);
+
+export const getAllUserLeaveBalances = (userId) =>
+  axiosInstance.get(`/users/get-all-users-leave-balance/${userId}`);
 
 export const approveUserLeave = (userId, requesterId) =>
   axiosInstance.post(`/users/approve-leave/${userId}/${requesterId}`);

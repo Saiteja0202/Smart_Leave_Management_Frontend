@@ -36,7 +36,7 @@ import IconButton from '@mui/material/IconButton';
 const UserLogin = () => {
   const [formData, setFormData] = useState({ userName: '', password: '' });
   const [loading, setLoading] = useState(false);
-  const [dialogType, setDialogType] = useState(null); // 'username' or 'password'
+  const [dialogType, setDialogType] = useState(null); 
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
@@ -207,7 +207,7 @@ const UserLogin = () => {
   fullWidth
   label="Password"
   name="password"
-  type={showPassword ? 'text' : 'password'}
+  type={showPassword ? 'password' : 'text'}  // reversed logic
   value={formData.password}
   onChange={handleChange}
   margin="normal"
@@ -215,8 +215,8 @@ const UserLogin = () => {
   InputProps={{
     endAdornment: (
       <InputAdornment position="end">
-        <IconButton onClick={togglePasswordVisibility} edge="end">
-          {showPassword ? <VisibilityOff /> : <Visibility />}
+        <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
+          {showPassword ? <Visibility /> : <VisibilityOff />}
         </IconButton>
       </InputAdornment>
     ),

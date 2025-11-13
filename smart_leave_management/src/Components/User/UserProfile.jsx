@@ -33,33 +33,27 @@ const UserProfile = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [openEmailDialog, setOpenEmailDialog] = useState(false);
   const [openOtpDialog, setOpenOtpDialog] = useState(false);
-  const [otpLoading, setOtpLoading] = useState(false);
   const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
-  const [passwordData, setPasswordData] = useState({
-    oldPassword: '',
-    newPassword: '',
-  });
+  const [passwordData, setPasswordData] = useState({ oldPassword: '', newPassword: '' });
 
   const userId = sessionStorage.getItem('userId');
   const navigate = useNavigate();
 
-  // ✅ Fetch User Details
-  const fetchUser = async () => {
-    try {
-      const res = await getUserDetails(userId);
-      setUser(res.data);
-    } catch {
-      setUser(null);
-    }
-  };
-
   useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await getUserDetails(userId);
+        setUser(res.data);
+      } catch {
+        setUser(null);
+      }
+    };
     fetchUser();
   }, [userId]);
 
-  // ✅ Profile Edit
   const handleOpenDialog = () => {
     setEditData(user);
     setOpenDialog(true);
@@ -75,25 +69,20 @@ const UserProfile = () => {
       await updateUserDetails(userId, editData);
       Swal.fire('Updated', 'Profile updated successfully', 'success');
       setOpenDialog(false);
-      fetchUser();
+      const res = await getUserDetails(userId);
+      setUser(res.data);
     } catch {
       Swal.fire('Error', 'Failed to update profile', 'error');
     }
   };
 
-  // ✅ Password Change
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
     setPasswordData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ Send OTP
   const handleEmailSubmit = async () => {
-    if (!email) {
-      Swal.fire('Error', 'Please enter your email', 'error');
-      return;
-    }
- 
+    if (!email) return Swal.fire('Error', 'Please enter your email', 'error');
     setOtpLoading(true);
     try {
       await generateOtpForPassword({ email });
@@ -106,14 +95,9 @@ const UserProfile = () => {
       setOtpLoading(false);
     }
   };
- 
- 
+
   const handleOtpSubmit = async () => {
-    if (!otp) {
-      Swal.fire('Error', 'Please enter the OTP', 'error');
-      return;
-    }
- 
+    if (!otp) return Swal.fire('Error', 'Please enter the OTP', 'error');
     setOtpLoading(true);
     try {
       await verifyOtpForPassword({ otp });
@@ -126,14 +110,11 @@ const UserProfile = () => {
       setOtpLoading(false);
     }
   };
- 
 
-  // ✅ Update Password
   const handlePasswordUpdate = async () => {
     const { oldPassword, newPassword } = passwordData;
     if (!oldPassword || !newPassword) {
-      Swal.fire('Error', 'Please fill in both password fields', 'error');
-      return;
+      return Swal.fire('Error', 'Please fill in both password fields', 'error');
     }
     try {
       await updatePassword(userId, passwordData);
@@ -145,7 +126,6 @@ const UserProfile = () => {
     }
   };
 
-  // ✅ Delete Account
   const handleDelete = async () => {
     const confirm = await Swal.fire({
       title: 'Are you sure?',
@@ -154,7 +134,6 @@ const UserProfile = () => {
       showCancelButton: true,
       confirmButtonText: 'Yes, delete it!',
     });
-
     if (confirm.isConfirmed) {
       try {
         await deleteAccount(userId);
@@ -177,15 +156,14 @@ const UserProfile = () => {
 
   const firstLetter = user.firstName?.charAt(0)?.toUpperCase() || 'U';
 
-  // ✅ UI Layout
   return (
     <Paper
       elevation={3}
       sx={{
-        p: 4,
+        p: { xs: 2, sm: 4 },
         borderRadius: 4,
         background: 'linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%)',
-        boxShadow: '0px 4px 15px rgba(0,0,0,0.08)',
+        boxShadow: 3,
         animation: 'fadeIn 0.6s ease-in-out',
         '@keyframes fadeIn': {
           from: { opacity: 0, transform: 'translateY(15px)' },
@@ -193,20 +171,11 @@ const UserProfile = () => {
         },
       }}
     >
-      <Box sx={{ textAlign: 'center', mb: 3 }}>
-        <Avatar
-          sx={{
-            bgcolor: '#0288d1',
-            width: 80,
-            height: 80,
-            mx: 'auto',
-            mb: 1,
-            fontSize: 32,
-          }}
-        >
+      <Box textAlign="center" mb={3}>
+        <Avatar sx={{ bgcolor: '#0288d1', width: 80, height: 80, mx: 'auto', mb: 1, fontSize: 32 }}>
           {firstLetter}
         </Avatar>
-        <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#183c86' }}>
+        <Typography variant="h5" fontWeight="bold" color="#183c86">
           {user.firstName} {user.lastName}
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -214,77 +183,58 @@ const UserProfile = () => {
         </Typography>
       </Box>
 
-      <Divider sx={{ my: 3 }} />
-
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
-          <Typography><strong>Email:</strong> {user.email}</Typography>
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <Typography><strong>Phone:</strong> {user.phoneNumber}</Typography>
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <Typography><strong>Gender:</strong> {user.gender}</Typography>
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <Typography><strong>Country:</strong> {user.countryName}</Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography><strong>Address:</strong> {user.address}</Typography>
-        </Grid>
+      <Divider sx={{ mb: 3 }} />
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+  <Grid container spacing={2} sx={{ maxWidth: 1000 }}>
+    {[
+      ['Email', user.email],
+      ['Phone', user.phoneNumber],
+      ['Gender', user.gender],
+      ['Country', user.countryName],
+      ['Address', user.address],
+    ].map(([label, value], i) => (
+      <Grid item xs={12} sm={i < 4 ? 6 : 12} key={label}>
+        <Typography>
+          <strong>{label}:</strong> {value}
+        </Typography>
       </Grid>
+    ))}
+  </Grid>
+</Box>
 
-      {/* 🔘 Action Buttons */}
-      <Box
-        sx={{
-          mt: 4,
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 2,
-          justifyContent: 'center',
-        }}
-      >
+      <Box mt={4} display="flex" flexWrap="wrap" gap={2} justifyContent="center">
         <Tooltip title="Edit Profile">
-          <Button
-            variant="contained"
-            startIcon={<Edit />}
-            onClick={handleOpenDialog}
-          >
+          <Button variant="contained" startIcon={<Edit />} onClick={handleOpenDialog}>
             Update Profile
           </Button>
         </Tooltip>
-
         <Tooltip title="Change Password">
-          <Button
-            variant="outlined"
-            startIcon={<LockReset />}
-            onClick={() => setOpenEmailDialog(true)}
-          >
+          <Button variant="outlined" startIcon={<LockReset />} onClick={() => setOpenEmailDialog(true)}>
             Change Password
           </Button>
         </Tooltip>
-
         <Tooltip title="Delete Account">
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<Delete />}
-            onClick={handleDelete}
-          >
+          <Button variant="outlined" color="error" startIcon={<Delete />} onClick={handleDelete}>
             Delete Account
           </Button>
         </Tooltip>
       </Box>
 
-      {/* ✏️ Edit Profile Dialog */}
+      {/* Edit Profile Dialog */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth>
         <DialogTitle>Edit Profile</DialogTitle>
         <DialogContent>
-          <TextField fullWidth label="First Name" name="firstName" value={editData.firstName || ''} onChange={handleChange} margin="normal" />
-          <TextField fullWidth label="Last Name" name="lastName" value={editData.lastName || ''} onChange={handleChange} margin="normal" />
-          <TextField fullWidth label="Email" name="email" value={editData.email || ''} onChange={handleChange} margin="normal" />
-          <TextField fullWidth label="Phone Number" name="phoneNumber" value={editData.phoneNumber || ''} onChange={handleChange} margin="normal" />
-          <TextField fullWidth label="Address" name="address" value={editData.address || ''} onChange={handleChange} margin="normal" />
+          {['firstName', 'lastName', 'email', 'phoneNumber', 'address'].map((field) => (
+            <TextField
+              key={field}
+              fullWidth
+              label={field.replace(/([A-Z])/g, ' $1')}
+              name={field}
+              value={editData[field] || ''}
+              onChange={handleChange}
+              margin="normal"
+            />
+          ))}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
@@ -292,7 +242,7 @@ const UserProfile = () => {
         </DialogActions>
       </Dialog>
 
-      {/* ✉️ Email Dialog */}
+      {/* Email Dialog */}
       <Dialog open={openEmailDialog} onClose={() => setOpenEmailDialog(false)}>
         <DialogTitle>Enter Email to Receive OTP</DialogTitle>
         <DialogContent>
@@ -308,13 +258,12 @@ const UserProfile = () => {
         <DialogActions>
           <Button onClick={() => setOpenEmailDialog(false)}>Cancel</Button>
           <Button onClick={handleEmailSubmit} variant="contained" disabled={otpLoading}>
-  {otpLoading ? <CircularProgress size={24} color="inherit" /> : 'Send OTP'}
-</Button>
- 
+          {otpLoading ? <CircularProgress size={24} color="inherit" /> : 'Send OTP'}
+          </Button>
         </DialogActions>
       </Dialog>
 
-      {/* 🔢 OTP Dialog */}
+      {/* OTP Dialog */}
       <Dialog open={openOtpDialog} onClose={() => setOpenOtpDialog(false)}>
         <DialogTitle>Enter OTP</DialogTitle>
         <DialogContent>
@@ -329,13 +278,12 @@ const UserProfile = () => {
         <DialogActions>
           <Button onClick={() => setOpenOtpDialog(false)}>Cancel</Button>
           <Button onClick={handleOtpSubmit} variant="contained" disabled={otpLoading}>
-  {otpLoading ? <CircularProgress size={24} color="inherit" /> : 'Verify OTP'}
-</Button>
- 
+            {otpLoading ? <CircularProgress size={24} color="inherit" /> : 'Verify OTP'}
+          </Button>
         </DialogActions>
       </Dialog>
 
-      {/* 🔐 Password Dialog */}
+      {/* Password Dialog */}
       <Dialog open={openPasswordDialog} onClose={() => setOpenPasswordDialog(false)}>
         <DialogTitle>Change Password</DialogTitle>
         <DialogContent>
@@ -360,7 +308,9 @@ const UserProfile = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenPasswordDialog(false)}>Cancel</Button>
-          <Button onClick={handlePasswordUpdate} variant="contained">Update</Button>
+          <Button onClick={handlePasswordUpdate} variant="contained">
+            Update
+          </Button>
         </DialogActions>
       </Dialog>
     </Paper>

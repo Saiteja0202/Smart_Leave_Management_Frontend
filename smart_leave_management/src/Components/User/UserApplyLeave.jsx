@@ -1,17 +1,10 @@
 import { useEffect, useState } from 'react';
 import {
-  Paper,
-  Typography,
-  TextField,
-  Button,
-  MenuItem,
-  CircularProgress,
-  Box,
+  Paper, Typography, TextField, Button, MenuItem,
+  CircularProgress, Box
 } from '@mui/material';
 import {
-  applyLeave,
-  calculateLeaveDuration,
-  getUserLeaveBalance,
+  applyLeave, calculateLeaveDuration, getUserLeaveBalance
 } from '../ApiCenter/UserApi';
 import Swal from 'sweetalert2';
 
@@ -26,101 +19,60 @@ const leaveTypes = [
 const UserApplyLeave = () => {
   const userId = sessionStorage.getItem('userId');
   const [formData, setFormData] = useState({
-    leaveType: '',
-    startDate: '',
-    endDate: '',
-    comments: '',
+    leaveType: '', startDate: '', endDate: '', comments: ''
   });
   const [duration, setDuration] = useState(null);
   const [leaveBalance, setLeaveBalance] = useState({});
   const [loading, setLoading] = useState(false);
-  const [dateError, setDateError] = useState(false);
-  const [dateErrorMessage, setDateErrorMessage] = useState('');
+  const [dateError, setDateError] = useState('');
   const [balanceError, setBalanceError] = useState(false);
 
   useEffect(() => {
-    const fetchBalance = async () => {
-      try {
-        const res = await getUserLeaveBalance(userId);
-        setLeaveBalance(res.data[0]);
-      } catch {
-        setLeaveBalance({});
-      }
-    };
-    fetchBalance();
+    getUserLeaveBalance(userId)
+      .then(res => setLeaveBalance(res.data[0]))
+      .catch(() => setLeaveBalance({}));
   }, [userId]);
 
   useEffect(() => {
     const { startDate, endDate } = formData;
     if (startDate && endDate) {
-      const calculate = async () => {
-        try {
-          const res = await calculateLeaveDuration(userId, startDate, endDate);
+      calculateLeaveDuration(userId, startDate, endDate)
+        .then(res => {
           setDuration(res.data);
-          setDateError(false);
-          setDateErrorMessage('');
-        } catch (error) {
+          setDateError('');
+        })
+        .catch(err => {
           setDuration(null);
-          setDateError(true);
-          const message =
-            error.response?.data || 'Failed to calculate duration. Please check your dates.';
-          setDateErrorMessage(message);
-        }
-      };
-      calculate();
+          setDateError(err.response?.data || 'Invalid date range.');
+        });
     } else {
       setDuration(null);
-      setDateError(false);
-      setDateErrorMessage('');
+      setDateError('');
     }
   }, [formData.startDate, formData.endDate, userId]);
 
   useEffect(() => {
-    if (
-      formData.leaveType &&
-      duration !== null &&
-      leaveBalance &&
-      leaveBalance[`${formData.leaveType.toLowerCase()}Leave`] !== undefined
-    ) {
-      const available = leaveBalance[`${formData.leaveType.toLowerCase()}Leave`];
-      setBalanceError(duration > available);
-    } else {
-      setBalanceError(false);
-    }
+    const key = `${formData.leaveType?.toLowerCase()}Leave`;
+    const available = leaveBalance[key];
+    setBalanceError(duration !== null && available !== undefined && duration > available);
   }, [formData.leaveType, duration, leaveBalance]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const isFormValid = () =>
-    formData.leaveType &&
-    formData.startDate &&
-    formData.endDate &&
-    formData.comments.trim() &&
-    !dateError &&
-    !balanceError;
+    formData.leaveType && formData.startDate && formData.endDate &&
+    formData.comments.trim() && !dateError && !balanceError;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const leaveApplicationForm = {
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        leaveType: formData.leaveType,
-        comments: formData.comments,
-        duration,
-      };
-      await applyLeave(userId, leaveApplicationForm);
+      await applyLeave(userId, { ...formData, duration });
       Swal.fire('Success', 'Leave applied successfully', 'success');
-      setFormData({
-        leaveType: '',
-        startDate: '',
-        endDate: '',
-        comments: '',
-      });
+      setFormData({ leaveType: '', startDate: '', endDate: '', comments: '' });
       setDuration(null);
     } catch {
       Swal.fire('Error', 'Failed to apply leave', 'error');
@@ -130,33 +82,15 @@ const UserApplyLeave = () => {
   };
 
   return (
-    <Paper sx={{ p: 4 }}>
-      <Box
-        sx={{
-          background: 'linear-gradient(to right, #183c86, #5c6bc0)',
-          borderRadius: 2,
-          p: 2,
-          mb: 3,
-        }}
-      >
-      <Typography
-        variant="h5"
-        align="center"
-        gutterBottom
-        sx={{ color: '#fff', fontWeight: 'bold' }}
-      >
-        Apply for leave
-      </Typography></Box>
+    <Paper elevation={3} sx={{ maxWidth: 1500, mx: 'auto', p: { xs: 2, sm: 4 }, borderRadius: 3 }}>
+      <Box sx={{ background: 'linear-gradient(to right, #183c86, #5c6bc0)', borderRadius: 2, p: 2, mb: 3, textAlign: 'center' }}>
+        <Typography variant="h5" sx={{ color: '#fff', fontWeight: 'bold' }}>Apply for Leave</Typography>
+      </Box>
+
       <form onSubmit={handleSubmit}>
         <TextField
-          select
-          fullWidth
-          label="Leave Type"
-          name="leaveType"
-          value={formData.leaveType}
-          onChange={handleChange}
-          margin="normal"
-          required
+          select fullWidth required name="leaveType" label="Leave Type"
+          value={formData.leaveType} onChange={handleChange} margin="normal"
         >
           {leaveTypes.map(({ key, label }) => (
             <MenuItem key={label} value={label}>
@@ -165,39 +99,21 @@ const UserApplyLeave = () => {
           ))}
         </TextField>
 
-        <TextField
-          fullWidth
-          type="date"
-          label="Start Date"
-          name="startDate"
-          value={formData.startDate}
-          onChange={handleChange}
-          margin="normal"
-          InputLabelProps={{ shrink: true }}
-          required
-          error={dateError}
-          helperText={dateError ? dateErrorMessage : ''}
-        />
-        <TextField
-          fullWidth
-          type="date"
-          label="End Date"
-          name="endDate"
-          value={formData.endDate}
-          onChange={handleChange}
-          margin="normal"
-          InputLabelProps={{ shrink: true }}
-          required
-          error={dateError}
-          helperText={dateError ? dateErrorMessage : ''}
-        />
+        {['startDate', 'endDate'].map((field) => (
+          <TextField
+            key={field}
+            fullWidth required type="date" name={field}
+            label={field === 'startDate' ? 'Start Date' : 'End Date'}
+            value={formData[field]} onChange={handleChange}
+            margin="normal" InputLabelProps={{ shrink: true }}
+            error={!!dateError} helperText={dateError}
+          />
+        ))}
 
         {duration !== null && !dateError && (
-          <Box sx={{ mt: 1 }}>
-            <Typography variant="body2" color="text.secondary">
-              Duration: {duration} day{duration > 1 ? 's' : ''}
-            </Typography>
-          </Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Duration: {duration} day{duration > 1 ? 's' : ''}
+          </Typography>
         )}
 
         {balanceError && (
@@ -207,20 +123,15 @@ const UserApplyLeave = () => {
         )}
 
         <TextField
-          fullWidth
-          label="Comments"
-          name="comments"
-          value={formData.comments}
-          onChange={handleChange}
+          fullWidth required multiline minRows={2}
+          name="comments" label="Comments"
+          value={formData.comments} onChange={handleChange}
           margin="normal"
-          required
         />
 
         <Button
-          type="submit"
-          variant="contained"
-          sx={{ mt: 2 }}
-          disabled={!isFormValid() || loading}
+          type="submit" variant="contained"
+          sx={{ mt: 2 }} disabled={!isFormValid() || loading}
         >
           {loading ? <CircularProgress size={24} /> : 'Apply Leave'}
         </Button>

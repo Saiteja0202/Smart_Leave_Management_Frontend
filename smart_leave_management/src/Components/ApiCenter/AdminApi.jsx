@@ -51,8 +51,36 @@ export const getAllHolidays = (adminId) =>
 export const deleteUser = (adminId, userId) =>
   axiosInstance.delete(`/admin/delete-user/${adminId}/${userId}`);
 
-export const updateCalendar = (adminId) =>
-  axiosInstance.put(`/admin/update-calendar/${adminId}`);
+// export const updateCalendar = (adminId) =>
+//   axiosInstance.put(`/admin/update-calendar/${adminId}`);
 
 export const updateAdminDetails = (adminId, adminData) =>
   axiosInstance.put(`/admin/update/${adminId}`, adminData);
+
+
+
+export const uploadCalendar = (adminId, file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return axiosInstance.post(`/admin/upload-calendar/${adminId}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
+
+export const updateCalendar = (adminId, holidays) => {
+  return axiosInstance.post(`/admin/update-calendar/${adminId}`, holidays, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+};
+
+
+export const updateSingleHoliday = (adminId, holidayId, holidayData) =>
+  axiosInstance.put(`/admin/update-single-holiday/${adminId}/${holidayId}`, holidayData, {
+    headers: { 'Content-Type': 'application/json' },
+  });

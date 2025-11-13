@@ -174,12 +174,12 @@ const UserApprovals = () => {
                   return (
                     <TableRow key={req.leaveId} hover sx={{ backgroundColor: i % 2 ? '#fff' : '#f9f9fc' }}>
                       <TableCell>{name}</TableCell>
-                      <TableCell>{role}</TableCell>
+                      <TableCell>{role.replace(/_/g, ' ')}</TableCell>
                       <TableCell>{req.leaveType}</TableCell>
                       <TableCell>{req.startDate}</TableCell>
                       <TableCell>{req.endDate}</TableCell>
                       <TableCell>{req.duration}</TableCell>
-                      <TableCell>{req.approver}</TableCell>
+                      <TableCell>{req.approver.replace(/_/g, ' ')}</TableCell>
                       <TableCell>{getStatusChip(req.leaveStatus)}</TableCell>
                       <TableCell>{getActionCell(req)}</TableCell>
                     </TableRow>

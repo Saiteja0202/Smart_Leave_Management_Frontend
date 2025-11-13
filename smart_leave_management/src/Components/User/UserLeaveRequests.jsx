@@ -139,7 +139,9 @@ const UserLeaveRequests = () => {
                     <Divider />
                     <Typography variant="body2"><strong>From:</strong> {r.startDate} <strong>To:</strong> {r.endDate}</Typography>
                     <Typography variant="body2"><strong>Duration:</strong> {r.duration} day(s)</Typography>
-                    <Typography variant="body2"><strong>Approver:</strong> {r.approver}</Typography>
+                    <Typography variant="body2">
+  <strong>Approver:</strong> {r.approver.replace(/_/g, ' ')}
+</Typography>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto' }}>
                       {getChip(r.leaveStatus)}
                       {r.leaveStatus === 'PENDING' && (

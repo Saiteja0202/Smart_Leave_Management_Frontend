@@ -73,7 +73,7 @@ const AdminAddRolePolicies = () => {
             <Select name="role" value={policyData.role} onChange={handleChange} label="Select Role">
               {roles.map(({ roleName }) => (
                 <MenuItem key={roleName} value={roleName} disabled={usedRoles.includes(roleName)}>
-                  {roleName}
+                  {roleName.replace(/_/g, ' ')}
                 </MenuItem>
               ))}
             </Select>
@@ -132,7 +132,7 @@ const AdminAddRolePolicies = () => {
                   <TableBody>
                     {leavePolicies.map((p) => (
                       <TableRow key={p.roleBasedLeaveId} sx={{ '&:hover': { backgroundColor: 'rgba(24,60,134,0.05)', transition: '0.2s' } }}>
-                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>{p.role}</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>{p.role.replace(/_/g, ' ')}</TableCell>
                         <TableCell align="center">{p.sickLeave}</TableCell>
                         <TableCell align="center">{p.earnedLeave}</TableCell>
                         <TableCell align="center">{p.casualLeave}</TableCell>

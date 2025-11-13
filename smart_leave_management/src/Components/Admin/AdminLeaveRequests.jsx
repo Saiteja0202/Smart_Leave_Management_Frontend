@@ -169,14 +169,14 @@ const AdminLeaveRequests = () => {
                 >
                   <ListItemText
                     primary={<Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#183c86' }}>
-                      {req.userName} (ID: {req.userId}) — {req.userRole}
+                      {req.userName} (ID: {req.userId}) — {req.userRole.replace(/_/g, ' ')}
                     </Typography>}
                     secondary={
                       <>
                         <Typography variant="body2" color="text.secondary">Leave Type: {req.leaveType} ({req.leaveTypePlannedAndUnplanned})</Typography>
                         <Typography variant="body2" color="text.secondary">Duration: {req.duration} day(s)</Typography>
                         <Typography variant="body2" color="text.secondary">From: {req.startDate} To: {req.endDate}</Typography>
-                        <Typography variant="body2" color="text.secondary">Approver: {req.approver}</Typography>
+                        <Typography variant="body2" color="text.secondary">Approver: {req.approver.replace(/_/g, ' ')}</Typography>
                       </>
                     }
                   />

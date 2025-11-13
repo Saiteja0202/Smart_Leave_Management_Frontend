@@ -164,7 +164,7 @@ const AdminUsers = () => {
                       secondary={
                         <>
                           <Typography variant="body2" color="text.secondary">
-                            Email: {email} | Role: {role?.roleName || userRole}
+                            Email: {email} | Role: {role?.roleName.replace(/_/g, ' ') || userRole.replace(/_/g, ' ')}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
                             Country: {countryName} | Gender: {gender}

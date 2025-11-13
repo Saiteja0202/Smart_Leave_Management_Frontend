@@ -67,21 +67,21 @@ const UserLeaveBalance = () => {
           <CircularProgress />
         </Box>
       ) : balanceData ? (
-        <Grid container spacing={5}>
+        <Grid container spacing={6}>
           {leaveTypes.map(({ key, label, icon }) => (
             <Grid item xs={12} sm={6} md={4} key={key}>
               <Box
                 sx={{
                   border: '1px solid #e0e0e0',
                   borderRadius: 3,
-                  p: 3,
+                  p: 4,
                   textAlign: 'center',
                   backgroundColor: '#f5f5f5',
-                  boxShadow: 2,
+                  boxShadow: 8,
                   transition: 'transform 0.2s ease-in-out',
                   '&:hover': {
                     transform: 'scale(1.03)',
-                    boxShadow: 4,
+                    boxShadow: 20,
                   },
                 }}
               >

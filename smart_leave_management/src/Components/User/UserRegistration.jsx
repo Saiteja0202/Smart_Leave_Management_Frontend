@@ -1,17 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
-  Container,
-  TextField,
-  Button,
-  Typography,
-  Box,
-  Link,
-  CircularProgress,
-  MenuItem,
-  useMediaQuery,
-  useTheme,
-  IconButton,
-  InputAdornment,
+  Container, TextField, Button, Typography, Box, Link, CircularProgress,
+  MenuItem, useMediaQuery, useTheme, IconButton, InputAdornment
 } from '@mui/material';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
@@ -26,12 +16,13 @@ const UserRegistration = () => {
     userName: '',
     email: '',
     password: '',
-    phoneNumber: '',
     address: '',
     gender: '',
     countryName: '',
   });
 
+  const [countryCode, setCountryCode] = useState('+91');
+  const [localNumber, setLocalNumber] = useState('');
   const [countries, setCountries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -46,7 +37,7 @@ const UserRegistration = () => {
   const navigate = useNavigate();
 
   const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
   const phoneRegex = /^\d{10}$/;
   const usernameRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{4,}$/;
 
@@ -74,7 +65,6 @@ const UserRegistration = () => {
     if (name === 'password') setPasswordValid(passwordRegex.test(value));
     if (name === 'userName') setUsernameValid(usernameRegex.test(value));
     if (name === 'email') setEmailValid(emailRegex.test(value));
-    if (name === 'phoneNumber') setPhoneValid(phoneRegex.test(value));
   };
 
   const validateForm = () => {
@@ -85,7 +75,7 @@ const UserRegistration = () => {
       formData.gender &&
       formData.countryName &&
       emailRegex.test(formData.email) &&
-      phoneRegex.test(formData.phoneNumber) &&
+      phoneRegex.test(localNumber) &&
       usernameRegex.test(formData.userName) &&
       passwordRegex.test(formData.password)
     );
@@ -95,8 +85,13 @@ const UserRegistration = () => {
     e.preventDefault();
     setLoading(true);
 
+    const formattedData = {
+      ...formData,
+      phoneNumber: `${countryCode}-${localNumber}`,
+    };
+
     try {
-      const response = await registerUser(formData);
+      const response = await registerUser(formattedData);
       await Swal.fire({
         icon: 'success',
         title: 'Registration Successful',
@@ -120,25 +115,8 @@ const UserRegistration = () => {
 
   return (
     <Container maxWidth="md">
-      <Box
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          px: 2,
-        }}
-      >
-        <Box
-          sx={{
-            width: '100%',
-            maxWidth: 600,
-            p: isMobile ? 3 : 5,
-            boxShadow: 3,
-            borderRadius: 3,
-            backgroundColor: '#fff',
-          }}
-        >
+      <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', px: 2 }}>
+        <Box sx={{ width: '100%', maxWidth: 600, p: isMobile ? 3 : 5, boxShadow: 3, borderRadius: 3, backgroundColor: '#fff' }}>
           <Typography variant={isMobile ? 'h5' : 'h4'} align="center" gutterBottom>
             User Registration
           </Typography>
@@ -190,24 +168,39 @@ const UserRegistration = () => {
               }}
             />
 
-            <TextField
-              fullWidth
-              label="Phone Number"
-              name="phoneNumber"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              margin="normal"
-              required
-              helperText="Must be 10 digits"
-              error={phoneValid === false}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: phoneValid === true ? 'green' : phoneValid === false ? 'red' : undefined,
+            <Box sx={{ display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row', mt: 2 }}>
+              <TextField
+                select
+                label="Country Code"
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+                fullWidth
+              >
+                {['+91', '+1', '+44', '+61', '+81'].map((code) => (
+                  <MenuItem key={code} value={code}>{code}</MenuItem>
+                ))}
+              </TextField>
+
+              <TextField
+                label="Phone Number"
+                value={localNumber}
+                onChange={(e) => {
+                  setLocalNumber(e.target.value);
+                  setPhoneValid(phoneRegex.test(e.target.value));
+                }}
+                fullWidth
+                placeholder="1234567890"
+                helperText="Enter 10-digit number"
+                error={phoneValid === false}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: phoneValid === true ? 'green' : phoneValid === false ? 'red' : undefined,
+                    },
                   },
-                },
-              }}
-            />
+                }}
+              />
+            </Box>
 
             <TextField fullWidth label="Address" name="address" value={formData.address} onChange={handleChange} margin="normal" required />
 
@@ -224,35 +217,44 @@ const UserRegistration = () => {
             </TextField>
 
             <TextField
-              fullWidth
-              label="Password"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              value={formData.password}
-              onChange={handleChange}
-              margin="normal"
-              required
-              helperText="Min 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 symbol"
-              error={passwordValid === false}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: passwordValid === true ? 'green' : passwordValid === false ? 'red' : undefined,
-                  },
-                },
-              }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
+  fullWidth
+  label="Password"
+  name="password"
+  type={showPassword ? 'password' : 'text'} 
+  value={formData.password}
+  onChange={handleChange}
+  margin="normal"
+  required
+  helperText="Min 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 symbol"
+  error={passwordValid === false}
+  sx={{
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': {
+        borderColor: passwordValid === true ? 'green' : passwordValid === false ? 'red' : undefined,
+      },
+    },
+  }}
+  InputProps={{
+    endAdornment: (
+      <InputAdornment position="end">
+        <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
+          {showPassword ? <Visibility /> : <VisibilityOff />}
+        </IconButton>
+      </InputAdornment>
+    ),
+  }}
+/>
 
-            <Button fullWidth type="submit" variant="contained" color="primary" disabled={!validateForm() || loading} sx={{ mt: 2 }} size={isMobile ? 'medium' : 'large'}>
+
+            <Button
+              fullWidth
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={!validateForm() || loading}
+              sx={{ mt: 2 }}
+              size={isMobile ? 'medium' : 'large'}
+            >
               {loading ? <CircularProgress size={24} /> : 'Register'}
             </Button>
           </form>

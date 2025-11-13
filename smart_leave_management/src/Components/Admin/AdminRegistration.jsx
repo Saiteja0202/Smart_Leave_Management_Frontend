@@ -12,12 +12,21 @@ import {
   useTheme,
   IconButton,
   InputAdornment,
+  Grid, // Added Grid for phone input layout
 } from '@mui/material';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import { registerAdmin } from '../ApiCenter/AdminApi';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+
+// Define common country codes
+const countryCodes = [
+    { code: '+91', name: 'India' },
+    { code: '+1', name: 'USA/Canada' },
+    { code: '+44', name: 'UK' },
+    { code: '+61', name: 'Australia' },
+];
 
 const AdminRegister = () => {
   const [formData, setFormData] = useState({
@@ -26,11 +35,12 @@ const AdminRegister = () => {
     userName: '',
     email: '',
     password: '',
-    phoneNumber: '',
     address: '',
     gender: '',
   });
 
+  const [countryCode, setCountryCode] = useState('+91'); // Separate state for code
+  const [localNumber, setLocalNumber] = useState('');    // Separate state for 10 digits
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -44,7 +54,7 @@ const AdminRegister = () => {
   const navigate = useNavigate();
 
   const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
   const phoneRegex = /^\d{10}$/;
   const usernameRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{4,}$/;
 
@@ -60,17 +70,26 @@ const AdminRegister = () => {
     if (name === 'password') setPasswordValid(passwordRegex.test(value));
     if (name === 'userName') setUsernameValid(usernameRegex.test(value));
     if (name === 'email') setEmailValid(emailRegex.test(value));
-    if (name === 'phoneNumber') setPhoneValid(phoneRegex.test(value));
+  };
+  
+  // Helper to format the 10-digit number as XXX-XXX-XXXX for display
+  const formatPhoneNumberDisplay = (digits) => {
+    const rawDigits = digits.replace(/\D/g, '').slice(0, 10);
+    const parts = rawDigits.match(/^(\d{3})(\d{3})(\d{4})$/);
+    if (!parts) return rawDigits;
+    return `${parts[1]}-${parts[2]}-${parts[3]}`;
   };
 
+
   const validateForm = () => {
+    // Validate only the 10-digit number
     return (
       formData.firstName.trim() &&
       formData.lastName.trim() &&
       formData.address.trim() &&
       formData.gender &&
       emailRegex.test(formData.email) &&
-      phoneRegex.test(formData.phoneNumber) &&
+      phoneRegex.test(localNumber.replace(/\D/g, '')) && 
       usernameRegex.test(formData.userName) &&
       passwordRegex.test(formData.password)
     );
@@ -79,9 +98,17 @@ const AdminRegister = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    
+    const rawLocalNumber = localNumber.replace(/\D/g, '');
+
+    const dataToSend = {
+      ...formData,
+      // Combining country code and formatted number for the API
+      phoneNumber: `${countryCode} - ${formatPhoneNumberDisplay(rawLocalNumber)}`,
+    };
 
     try {
-      const response = await registerAdmin(formData);
+      const response = await registerAdmin(dataToSend);
 
       await Swal.fire({
         icon: 'success',
@@ -178,24 +205,50 @@ const AdminRegister = () => {
               }}
             />
 
-            <TextField
-              fullWidth
-              label="Phone Number"
-              name="phoneNumber"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              margin="normal"
-              required
-              helperText="Must be 10 digits"
-              error={phoneValid === false}
-              sx={{
+
+<Grid container spacing={3} sx={{ mt: 0 }}>
+    <Grid item xs={6}>
+        <TextField
+            select
+            label="Code"
+            value={countryCode}
+            onChange={(e) => setCountryCode(e.target.value)}
+            fullWidth
+            required
+        >
+            {countryCodes.map((option) => (
+                <MenuItem key={option.code} value={option.code}>
+                    {`${option.code} - ${option.name}`}
+                </MenuItem>
+            ))}
+        </TextField>
+    </Grid>
+    
+    <Grid item xs={6}>
+        <TextField
+            label="Phone Number"
+            value={formatPhoneNumberDisplay(localNumber)}
+            onChange={(e) => {
+                const rawValue = e.target.value.replace(/\D/g, '').slice(0, 10);
+                setLocalNumber(rawValue);
+                setPhoneValid(phoneRegex.test(rawValue));
+            }}
+            fullWidth
+            type="tel"
+            placeholder="XXX-XXX-XXXX"
+            helperText="Enter 10-digit number"
+            error={phoneValid === false}
+            inputProps={{ maxLength: 12 }} 
+            sx={{
                 '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: phoneValid === true ? 'green' : phoneValid === false ? 'red' : undefined,
-                  },
+                    '& fieldset': {
+                        borderColor: phoneValid === true ? 'green' : phoneValid === false ? 'red' : undefined,
+                    },
                 },
-              }}
-            />
+            }}
+        />
+    </Grid>
+</Grid>
 
             <TextField fullWidth label="Address" name="address" value={formData.address} onChange={handleChange} margin="normal" required />
 
@@ -206,32 +259,32 @@ const AdminRegister = () => {
             </TextField>
 
             <TextField
-              fullWidth
-              label="Password"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              value={formData.password}
-              onChange={handleChange}
-              margin="normal"
-              required
-              helperText="Min 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 symbol"
-              error={passwordValid === false}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: passwordValid === true ? 'green' : passwordValid === false ? 'red' : undefined,
-                  },
-                },
-              }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
+                fullWidth
+                label="Password"
+                name="password"
+                type={showPassword ? 'text' : 'password'} 
+                value={formData.password}
+                onChange={handleChange}
+                margin="normal"
+                required
+                helperText="Min 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 symbol"
+                error={passwordValid === false}
+                sx={{
+                    '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                            borderColor: passwordValid === true ? 'green' : passwordValid === false ? 'red' : undefined,
+                        },
+                    },
+                }}
+                InputProps={{
+                    endAdornment: (
+                        <InputAdornment position="end">
+                            <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
+                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                        </InputAdornment>
+                    ),
+                }}
             />
 
             <Button

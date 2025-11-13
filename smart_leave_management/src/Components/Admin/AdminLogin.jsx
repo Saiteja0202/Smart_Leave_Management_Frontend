@@ -123,7 +123,7 @@ const AdminLogin = () => {
               fullWidth
               label="Password"
               name="password"
-              type={showPassword ? 'text' : 'password'}
+              type={showPassword ? 'password' : 'text'} 
               value={loginDetails.password}
               onChange={handleChange}
               margin="normal"
@@ -131,8 +131,8 @@ const AdminLogin = () => {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={togglePasswordVisibility} edge="end">
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
+                      {showPassword ? <Visibility /> : <VisibilityOff />}
                     </IconButton>
                   </InputAdornment>
                 ),

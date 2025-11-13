@@ -1,203 +1,109 @@
 import { useEffect, useState } from 'react';
 import {
-  Container,
-  Typography,
-  Box,
-  CircularProgress,
-  Paper,
-  Grid,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  IconButton,
-  Divider,
-  Avatar,
+  Container, Typography, Box, CircularProgress, Paper, Grid,
+  Button, Dialog, DialogTitle, DialogContent, DialogActions,
+  TextField, IconButton, Divider, Avatar, MenuItem
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import Swal from 'sweetalert2';
 import { getAdminDetails, updateAdminDetails } from '../ApiCenter/AdminApi';
 
 const AdminProfile = () => {
+  const adminId = sessionStorage.getItem('adminId');
   const [adminData, setAdminData] = useState(null);
   const [editData, setEditData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [open, setOpen] = useState(false);
 
-  const adminId = sessionStorage.getItem('adminId');
-
   useEffect(() => {
-    const fetchAdminDetails = async () => {
-      try {
-        const response = await getAdminDetails(adminId);
-        setAdminData(response.data);
-        setEditData(response.data);
-      } catch (err) {
-        setError('Failed to load admin profile.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (adminId) {
-      fetchAdminDetails();
-    } else {
-      setError('Admin ID not found in session.');
-      setLoading(false);
-    }
+    if (!adminId) return setError('Admin ID not found in session.'), setLoading(false);
+    getAdminDetails(adminId)
+      .then(res => {
+        setAdminData(res.data);
+        setEditData(res.data);
+      })
+      .catch(() => setError('Failed to load admin profile.'))
+      .finally(() => setLoading(false));
   }, [adminId]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditData((prev) => ({ ...prev, [name]: value }));
-  };
+  const handleChange = (e) => setEditData({ ...editData, [e.target.name]: e.target.value });
 
   const handleUpdate = async () => {
     try {
       await updateAdminDetails(adminId, editData);
       setAdminData(editData);
       setOpen(false);
-      Swal.fire({
-        icon: 'success',
-        title: 'Profile Updated',
-        text: 'Your changes have been saved successfully.',
-        timer: 2000,
-        showConfirmButton: false,
-      });
+      Swal.fire({ icon: 'success', title: 'Profile Updated', timer: 2000, showConfirmButton: false });
     } catch {
       Swal.fire('Error', 'Failed to update profile', 'error');
     }
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}><CircularProgress /></Box>;
+  if (error) return <Typography color="error" align="center" sx={{ mt: 5 }}>{error}</Typography>;
 
-  if (error) {
-    return (
-      <Typography variant="body1" color="error" align="center" sx={{ mt: 5 }}>
-        {error}
-      </Typography>
-    );
-  }
-
-  const firstLetter = adminData?.firstName?.charAt(0)?.toUpperCase() || 'A';
   const fullName = `${adminData.firstName || ''} ${adminData.lastName || ''}`.trim();
+  const firstLetter = adminData?.firstName?.[0]?.toUpperCase() || 'A';
 
   return (
-    <Container maxWidth="md">
-      <Paper
-        elevation={4}
-        sx={{
-          p: 4,
-          mt: 5,
-          borderRadius: 3,
-          boxShadow: '0px 3px 8px rgba(0,0,0,0.1)',
-          backgroundColor: '#fff',
-        }}
-      >
-        {/* 🧑‍💼 Profile Header */}
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center',
-            mb: 3,
-          }}
-        >
-          <Avatar
-            sx={{
-              bgcolor: '#0288d1',
-              width: 80,
-              height: 80,
-              fontSize: 32,
-              mb: 1,
-            }}
-          >
-            {firstLetter}
-          </Avatar>
-
-          <Typography variant="h5" sx={{ color: '#183c86', fontWeight: 'bold' }}>
-            {fullName || 'Admin'}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Administrator
-          </Typography>
-
-          <IconButton
-            color="primary"
-            sx={{ mt: 1 }}
-            onClick={() => setOpen(true)}
-            title="Edit Profile"
-          >
-            <EditIcon />
-          </IconButton>
+    <Container maxWidth="100">
+      <Paper elevation={4} sx={{ p: 4, mt: 5, borderRadius: 3, backgroundColor: '#fff' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
+          <Avatar sx={{ bgcolor: '#0288d1', width: 80, height: 80, fontSize: 32, mb: 1 }}>{firstLetter}</Avatar>
+          <Typography variant="h5" sx={{ color: '#183c86', fontWeight: 'bold' }}>{fullName || 'Admin'}</Typography>
+          <Typography variant="body2" color="text.secondary">Administrator</Typography>
+          <IconButton color="primary" sx={{ mt: 1 }} onClick={() => setOpen(true)}><EditIcon /></IconButton>
         </Box>
 
         <Divider sx={{ my: 2 }} />
 
-        {/* 👤 Personal Info */}
-        <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', color: '#0288d1' }}>
-          Personal Information
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <Typography><strong>First Name:</strong> {adminData.firstName}</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Typography><strong>Last Name:</strong> {adminData.lastName}</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Typography><strong>Gender:</strong> {adminData.gender}</Typography>
-          </Grid>
-        </Grid>
-
-        {/* 📞 Contact Info */}
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold', color: '#0288d1' }}>
-          Contact Information
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <Typography><strong>Email:</strong> {adminData.email}</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Typography><strong>Phone:</strong> {adminData.phoneNumber}</Typography>
-          </Grid>
-          <Grid item xs={12}>
-            <Typography><strong>Address:</strong> {adminData.address}</Typography>
-          </Grid>
-        </Grid>
-
-        {/* 🔐 Account Info */}
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold', color: '#0288d1' }}>
-          Account Details
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <Typography><strong>Username:</strong> {adminData.userName}</Typography>
-          </Grid>
-        </Grid>
+        {[
+          { title: 'Personal Information', fields: [['First Name', 'firstName'], ['Last Name', 'lastName'], ['Gender', 'gender']] },
+          { title: 'Contact Information', fields: [['Email', 'email'], ['Phone', 'phoneNumber'], ['Address', 'address']] },
+          { title: 'Account Details', fields: [['Username', 'userName']] },
+        ].map((section, idx) => (
+          <Box key={idx} sx={{ mt: idx ? 3 : 0 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#0288d1', mb: 1 }}>{section.title}</Typography>
+            <Grid container spacing={2}>
+              {section.fields.map(([label, key]) => (
+                <Grid item xs={12} sm={key === 'address' ? 12 : 6} key={key}>
+                  <Typography><strong>{label}:</strong> {adminData[key]}</Typography>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        ))}
       </Paper>
 
-      {/* ✏️ Edit Dialog */}
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
         <DialogTitle>Edit Profile</DialogTitle>
         <DialogContent>
-          <TextField fullWidth margin="normal" label="Username" name="userName" value={editData.userName || ''} onChange={handleChange} />
-          <TextField fullWidth margin="normal" label="Email" name="email" type="email" value={editData.email || ''} onChange={handleChange} />
-          <TextField fullWidth margin="normal" label="First Name" name="firstName" value={editData.firstName || ''} onChange={handleChange} />
-          <TextField fullWidth margin="normal" label="Last Name" name="lastName" value={editData.lastName || ''} onChange={handleChange} />
-          <TextField fullWidth margin="normal" label="Phone Number" name="phoneNumber" value={editData.phoneNumber || ''} onChange={handleChange} />
-          <TextField fullWidth margin="normal" label="Gender" name="gender" value={editData.gender || ''} onChange={handleChange} />
-          <TextField fullWidth margin="normal" label="Address" name="address" value={editData.address || ''} onChange={handleChange} />
+          {['userName', 'email', 'firstName', 'lastName', 'phoneNumber', 'address'].map((field) => (
+            <TextField
+              key={field}
+              fullWidth
+              margin="normal"
+              label={field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+              name={field}
+              value={editData[field] || ''}
+              onChange={handleChange}
+            />
+          ))}
+          <TextField
+            fullWidth
+            select
+            label="Gender"
+            name="gender"
+            value={editData.gender || ''}
+            onChange={handleChange}
+            margin="normal"
+            required
+          >
+            <MenuItem value="MALE">Male</MenuItem>
+            <MenuItem value="FEMALE">Female</MenuItem>
+            <MenuItem value="TRANS">Trans</MenuItem>
+          </TextField>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>

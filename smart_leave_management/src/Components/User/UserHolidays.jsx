@@ -1,25 +1,22 @@
 import { useEffect, useState } from 'react';
 import { getUserHolidays } from '../ApiCenter/UserApi';
 import {
-  Paper,
-  Typography,
-  CircularProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Box,
+  Paper, Typography, CircularProgress, Table, TableBody,
+  TableCell, TableContainer, TableHead, TableRow, Box,
+  TablePagination
 } from '@mui/material';
 
 const UserHolidays = () => {
   const userId = sessionStorage.getItem('userId');
   const [holidays, setHolidays] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [sortField, setSortField] = useState('holidayDate');
+  const [sortOrder, setSortOrder] = useState('asc');
 
   useEffect(() => {
-    const fetchHolidays = async () => {
+    (async () => {
       try {
         const res = await getUserHolidays(userId);
         setHolidays(res.data);
@@ -28,88 +25,95 @@ const UserHolidays = () => {
       } finally {
         setLoading(false);
       }
-    };
-    fetchHolidays();
+    })();
   }, [userId]);
 
   const formatDate = (dateStr) => {
-    try {
-      const date = new Date(dateStr);
-      const day = date.toLocaleDateString('en-IN', { weekday: 'long' });
-      const dd = String(date.getDate()).padStart(2, '0');
-      const mm = String(date.getMonth() + 1).padStart(2, '0');
-      const yyyy = date.getFullYear();
-      return {
-        dateFormatted: `${dd}-${mm}-${yyyy}`,
-        day,
-      };
-    } catch {
-      return {
-        dateFormatted: 'Invalid Date',
-        day: 'N/A',
-      };
-    }
+    const date = new Date(dateStr);
+    return {
+      dateFormatted: date.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+      day: date.toLocaleDateString('en-IN', { weekday: 'long' })
+    };
   };
 
+  const handleSort = (field) => {
+    const order = sortField === field && sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortField(field);
+    setSortOrder(order);
+  };
+
+  const sortedHolidays = [...holidays].sort((a, b) => {
+    const valA = sortField === 'holidayDate' ? new Date(a[sortField]) : a[sortField];
+    const valB = sortField === 'holidayDate' ? new Date(b[sortField]) : b[sortField];
+    return sortOrder === 'asc'
+      ? valA > valB ? 1 : -1
+      : valA < valB ? 1 : -1;
+  });
+
   return (
-    <Paper sx={{ p: 4, boxShadow: 3, borderRadius: 3 }}>
-      <Box
-        sx={{
-          background: 'linear-gradient(to right, #183c86, #5c6bc0)',
-          borderRadius: 2,
-          p: 2,
-          mb: 3,
-        }}
-      >
-      <Typography
-        variant="h5"
-        align="center"
-        gutterBottom
-        sx={{ color: '#fff', fontWeight: 'bold' }}
-      >
-        Holiday Calendar
-      </Typography></Box>
+    <Paper elevation={3} sx={{ maxWidth: 1500, mx: 'auto', p: { xs: 2, sm: 4 }, borderRadius: 3 }}>
+      <Box sx={{ background: 'linear-gradient(to right, #183c86, #5c6bc0)', borderRadius: 2, p: 2, mb: 3, textAlign: 'center' }}>
+        <Typography variant="h5" sx={{ color: '#fff', fontWeight: 'bold' }}>Holiday Calendar</Typography>
+      </Box>
 
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <CircularProgress />
-        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>
       ) : holidays.length === 0 ? (
-        <Typography align="center" sx={{ mt: 2 }}>
-          No holiday data available.
-        </Typography>
+        <Typography align="center" sx={{ mt: 2 }}>No holiday data available.</Typography>
       ) : (
-        <TableContainer sx={{ mt: 2 }}>
+        <TableContainer>
           <Table stickyHeader>
             <TableHead>
               <TableRow sx={{ backgroundColor: '#e3f2fd' }}>
-                {['Date', 'Day', 'Holiday Name'].map((header) => (
-                  <TableCell key={header} sx={{ fontWeight: 'bold', color: '#183c86' }}>
-                    {header}
+                {[
+                  { label: 'Date', field: 'holidayDate' },
+                  { label: 'Day', field: 'day' },
+                  { label: 'Holiday Name', field: 'holidayName' }
+                ].map(({ label, field }) => (
+                  <TableCell
+                    key={field}
+                    align="center"
+                    sx={{ fontWeight: 'bold', color: '#183c86', cursor: 'pointer' }}
+                    onClick={() => handleSort(field)}
+                  >
+                    {label}
+                    {sortField === field && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
                   </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {holidays.map((holiday, index) => {
-                const { dateFormatted, day } = formatDate(holiday.holidayDate);
+              {sortedHolidays.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((h, i) => {
+                const { dateFormatted, day } = formatDate(h.holidayDate);
                 return (
                   <TableRow
-                    key={index}
+                    key={i}
                     hover
                     sx={{
-                      backgroundColor: index % 2 === 0 ? '#f9f9fc' : '#ffffff',
-                      transition: 'background-color 0.3s ease',
+                      backgroundColor: i % 2 === 0 ? '#f9f9fc' : '#fff',
+                      transition: 'background-color 0.3s ease'
                     }}
                   >
-                    <TableCell>{dateFormatted}</TableCell>
-                    <TableCell>{day}</TableCell>
-                    <TableCell>{holiday.holidayName}</TableCell>
+                    <TableCell align="center">{dateFormatted}</TableCell>
+                    <TableCell align="center">{day}</TableCell>
+                    <TableCell align="center">{h.holidayName}</TableCell>
                   </TableRow>
                 );
               })}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={holidays.length}
+            page={page}
+            onPageChange={(e, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(e) => {
+              setRowsPerPage(parseInt(e.target.value, 10));
+              setPage(0);
+            }}
+            rowsPerPageOptions={[10, 25, 50]}
+          />
         </TableContainer>
       )}
     </Paper>

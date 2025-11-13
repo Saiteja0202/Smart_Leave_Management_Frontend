@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -11,6 +12,7 @@ import {
   AppBar,
   Button,
   Avatar,
+  IconButton,
 } from '@mui/material';
 import {
   Dashboard,
@@ -21,12 +23,16 @@ import {
   RequestQuote,
   PeopleAlt,
   Logout,
+  Menu as MenuIcon,
 } from '@mui/icons-material';
 import { logout } from '../ApiCenter/AuthUtils';
 
 const drawerWidth = 240;
 
 const UserDashboard = () => {
+  const [open, setOpen] = useState(false);
+  const toggleDrawer = () => setOpen(!open);
+
   const navigate = useNavigate();
   const roleName = sessionStorage.getItem('role') || 'USER';
   const userName = sessionStorage.getItem('userName') || '';
@@ -62,7 +68,16 @@ const UserDashboard = () => {
         }}
       >
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <IconButton
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+              onClick={toggleDrawer}
+              sx={{ mr: 1 }}
+            >
+              <MenuIcon />
+            </IconButton>
             <Dashboard sx={{ fontSize: 28 }} />
             <Typography variant="h6" noWrap component="div">
               User Dashboard
@@ -87,10 +102,11 @@ const UserDashboard = () => {
       </AppBar>
 
       <Drawer
-        variant="permanent"
+        variant="temporary"
+        open={open}
+        onClose={toggleDrawer}
+        ModalProps={{ keepMounted: true }}
         sx={{
-          width: drawerWidth,
-          flexShrink: 0,
           [`& .MuiDrawer-paper`]: {
             width: drawerWidth,
             boxSizing: 'border-box',
@@ -125,6 +141,7 @@ const UserDashboard = () => {
                 key={item.path}
                 component={NavLink}
                 to={item.path}
+                onClick={toggleDrawer}
                 sx={{
                   my: 0.5,
                   mx: 1,
@@ -156,9 +173,9 @@ const UserDashboard = () => {
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
           backgroundColor: '#f7f9fc',
           minHeight: '100vh',
+          width: '100%',
           '@keyframes fadeIn': {
             from: { opacity: 0, transform: 'translateY(10px)' },
             to: { opacity: 1, transform: 'translateY(0)' },

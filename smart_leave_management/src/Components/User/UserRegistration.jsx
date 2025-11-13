@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
-import { getAllCountriesForUsers, registerUser } from '../ApiCenter/UserApi';
+import { getAllCountriesForUsers, registerUser, getAllCities } from '../ApiCenter/UserApi';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
@@ -19,11 +19,13 @@ const UserRegistration = () => {
     address: '',
     gender: '',
     countryName: '',
+    cityName: '',   // ➕ Added city field
   });
 
   const [countryCode, setCountryCode] = useState('+91');
   const [localNumber, setLocalNumber] = useState('');
   const [countries, setCountries] = useState([]);
+  const [cities, setCities] = useState([]); // ➕ Added cities state
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -53,6 +55,23 @@ const UserRegistration = () => {
     fetchCountries();
   }, []);
 
+  // Fetch cities dynamically when country changes
+  useEffect(() => {
+    const fetchCities = async () => {
+      if (formData.countryName) {
+        try {
+          const res = await getAllCities(formData.countryName);
+          setCities(res.data);
+        } catch {
+          setCities([]);
+        }
+      } else {
+        setCities([]);
+      }
+    };
+    fetchCities();
+  }, [formData.countryName]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     let updatedValue = name === 'gender' ? value.toUpperCase() : value;
@@ -74,6 +93,7 @@ const UserRegistration = () => {
       formData.address.trim() &&
       formData.gender &&
       formData.countryName &&
+      formData.cityName && // ➕ Ensure city is selected
       emailRegex.test(formData.email) &&
       phoneRegex.test(localNumber) &&
       usernameRegex.test(formData.userName) &&
@@ -216,35 +236,41 @@ const UserRegistration = () => {
               ))}
             </TextField>
 
-            <TextField
-  fullWidth
-  label="Password"
-  name="password"
-  type={showPassword ? 'password' : 'text'} 
-  value={formData.password}
-  onChange={handleChange}
-  margin="normal"
-  required
-  helperText="Min 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 symbol"
-  error={passwordValid === false}
-  sx={{
-    '& .MuiOutlinedInput-root': {
-      '& fieldset': {
-        borderColor: passwordValid === true ? 'green' : passwordValid === false ? 'red' : undefined,
-      },
-    },
-  }}
-  InputProps={{
-    endAdornment: (
-      <InputAdornment position="end">
-        <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
-          {showPassword ? <Visibility /> : <VisibilityOff />}
-        </IconButton>
-      </InputAdornment>
-    ),
-  }}
-/>
+            {/* ➕ New City Dropdown */}
+            <TextField fullWidth select label="City" name="cityName" value={formData.cityName} onChange={handleChange} margin="normal" required>
+              {cities.map((city) => (
+                <MenuItem key={city} value={city}>{city}</MenuItem>
+              ))}
+            </TextField>
 
+            <TextField
+              fullWidth
+              label="Password"
+              name="password"
+              type={showPassword ? 'text' : 'password'} 
+              value={formData.password}
+              onChange={handleChange}
+              margin="normal"
+              required
+              helperText="Min 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 symbol"
+              error={passwordValid === false}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: passwordValid === true ? 'green' : passwordValid === false ? 'red' : undefined,
+                  },
+                },
+              }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
+                      {showPassword ? <Visibility /> : <VisibilityOff />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
 
             <Button
               fullWidth

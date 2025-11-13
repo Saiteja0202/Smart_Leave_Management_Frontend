@@ -39,6 +39,9 @@ export const getAdminDetails = (adminId) =>
 export const getAllLeaveRequests = (adminId) =>
   axiosInstance.get(`/admin/get-all-leave-requests/${adminId}`);
 
+export const getAllUsersLeaveBalances = (adminId) =>
+  axiosInstance.get(`/admin/get-all-leave-balance/${adminId}`);
+
 export const getAllRoles = (adminId) =>
   axiosInstance.get(`/admin/get-all-roles/${adminId}`);
 

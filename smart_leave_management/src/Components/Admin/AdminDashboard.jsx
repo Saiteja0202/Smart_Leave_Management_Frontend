@@ -6,7 +6,8 @@ import {
 } from '@mui/material';
 import {
   Dashboard, Person, CalendarToday, Assignment, Groups,
-  BarChart, Policy, Upgrade, Logout, History, Menu as MenuIcon
+  BarChart, Policy, Upgrade, Logout, History, Menu as MenuIcon,
+  Assessment
 } from '@mui/icons-material';
 import { logout } from '../ApiCenter/AuthUtils';
 
@@ -31,6 +32,7 @@ const AdminDashboard = () => {
     { label: 'Leave Requests', path: 'leave-requests', icon: <Assignment /> },
     { label: 'Reports', path: 'reports', icon: <BarChart /> },
     { label: 'Registration History', path: 'registration-history', icon: <History /> },
+    { label: 'Users Leave Balance', path: 'all-users-leavebalance', icon: <Assessment /> },
   ];
 
   const handleLogout = () => {

@@ -20,7 +20,9 @@ import UserLeaveRequests from './Components/User/UserLeaveRequests';
 import UserHolidays from './Components/User/UserHolidays';
 import UserApplyLeave from './Components/User/UserApplyLeave';
 import UserApproval from './Components/User/UserApprovals'; 
+import UserAllLeaveBalances from './Components/User/UserAllLeaveBalances'; 
 import AdminRegistartionHistory from  './Components/Admin/AdminRegistrationHistory';
+import AdminAllUsersLeaveBalances from './Components/Admin/AdminAllUsersLeaveBalances';
 import NotFound from './Components/Others/NotFound';
 
 import AdminLeaveRequests from './Components/Admin/AdminLeaveRequests';
@@ -52,6 +54,8 @@ const AppRoutes = () => {
         <Route path="leave-requests" element={<AdminLeaveRequests />} /> 
         <Route path="reports" element={<AdminReports />} />
         <Route path="registration-history" element={<AdminRegistartionHistory />} />
+        <Route path="all-users-leavebalance" element={<AdminAllUsersLeaveBalances />} />
+        
       </Route>
 
       <Route
@@ -69,6 +73,7 @@ const AppRoutes = () => {
   <Route path="user-holidays" element={<UserHolidays />} />
   <Route path="user-apply-leave" element={<UserApplyLeave />} />
   <Route path="user-approvals" element={<UserApproval />} />
+  <Route path="user-all-leavebalance" element={<UserAllLeaveBalances />} />
 </Route>
 
  

@@ -150,12 +150,12 @@ const AdminLogin = () => {
               {loading ? <CircularProgress size={24} /> : 'Login'}
             </Button>
           </form>
-          <Typography align="center" sx={{ mt: 2 }}>
+          {/* <Typography align="center" sx={{ mt: 2 }}>
             Don't have an account?{' '}
             <Link href="/admin-register" underline="hover">
               Register here
             </Link>
-          </Typography>
+          </Typography> */}
           <Typography align="center" sx={{ mt: 2 }}>
             <Button
               variant="outlined"

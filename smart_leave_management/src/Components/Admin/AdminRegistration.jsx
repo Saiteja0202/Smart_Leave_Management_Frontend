@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState } from 'react';
 import {
   Container,
   TextField,
@@ -19,7 +19,7 @@ import { useNavigate } from 'react-router-dom';
 import { registerAdmin } from '../ApiCenter/AdminApi';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-
+import axios from "axios";
 // Define common country codes
 const countryCodes = [
     { code: '+91', name: 'India' },
@@ -39,8 +39,9 @@ const AdminRegister = () => {
     gender: '',
   });
 
-  const [countryCode, setCountryCode] = useState('+91'); // Separate state for code
-  const [localNumber, setLocalNumber] = useState('');    // Separate state for 10 digits
+  const [phoneCountries, setPhoneCountries] = useState([]);
+  const [countryCode, setCountryCode] = useState("");
+  const [localNumber, setLocalNumber] = useState("");   
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -79,6 +80,30 @@ const AdminRegister = () => {
     if (!parts) return rawDigits;
     return `${parts[1]}-${parts[2]}-${parts[3]}`;
   };
+
+  useEffect(() => {
+    const fetchPhoneCountries = async () => {
+      try {
+        const res = await axios.get(
+          "https://restcountries.com/v3.1/all?fields=name,idd"
+        );
+        const list = res.data
+          .filter(c => c.idd?.root) 
+          .map(c => ({
+            name: c.name?.common ?? "Unknown",
+            code: `${c.idd.root}${c.idd.suffixes?.[0] ?? ""}`,
+          }))
+          .filter(c => c.code && c.code.startsWith("+"))
+          .sort((a, b) => a.name.localeCompare(b.name));
+        setPhoneCountries(list);
+      } catch (err) {
+        console.error("Error fetching phone countries:", err.message);
+        setPhoneCountries([]);
+      }
+    };
+    fetchPhoneCountries();
+  }, []);
+
 
 
   const validateForm = () => {
@@ -206,7 +231,7 @@ const AdminRegister = () => {
             />
 
 
-<Grid container spacing={3} sx={{ mt: 0 }}>
+{/* <Grid container spacing={3} sx={{ mt: 0 }}>
     <Grid item xs={6}>
         <TextField
             select
@@ -248,7 +273,33 @@ const AdminRegister = () => {
             }}
         />
     </Grid>
-</Grid>
+</Grid> */}
+
+<Box sx={{ display: "flex", gap: 2, flexDirection: isMobile ? "column" : "row", mt: 2 }}>
+        <TextField
+          select
+          label="Country Code"
+          value={countryCode}
+          onChange={(e) => setCountryCode(e.target.value)}
+          fullWidth
+        >
+          {(phoneCountries ?? []).map((c) => (
+            <MenuItem key={`${c.name}-${c.code}`} value={c.code}>
+              {c.name} ({c.code})
+            </MenuItem>
+          ))}
+        </TextField>
+
+        {/* Phone Number Input (no validation now) */}
+        <TextField
+          label="Phone Number"
+          value={localNumber}
+          onChange={(e) => setLocalNumber(e.target.value.replace(/\D/g, ""))}
+          fullWidth
+          placeholder="1234567890"
+          helperText="Enter phone number"
+        />
+      </Box>
 
             <TextField fullWidth label="Address" name="address" value={formData.address} onChange={handleChange} margin="normal" required />
 

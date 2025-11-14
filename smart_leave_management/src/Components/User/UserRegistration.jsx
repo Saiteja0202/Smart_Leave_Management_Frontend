@@ -8,7 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { getAllCountriesForUsers, registerUser, getAllCities } from '../ApiCenter/UserApi';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-
+import axios from "axios";
+// import { fetchPhoneCountries } from "./phoneCountries";
 const UserRegistration = () => {
   const [formData, setFormData] = useState({
     firstName: '',
@@ -19,19 +20,20 @@ const UserRegistration = () => {
     address: '',
     gender: '',
     countryName: '',
-    cityName: '',   // ➕ Added city field
+    cityName: '',   
   });
+  const [phoneCountries, setPhoneCountries] = useState([]);
+  const [countryCode, setCountryCode] = useState("");
+  const [localNumber, setLocalNumber] = useState("");
+  // const [phoneValid, setPhoneValid] = useState(null);
 
-  const [countryCode, setCountryCode] = useState('+91');
-  const [localNumber, setLocalNumber] = useState('');
   const [countries, setCountries] = useState([]);
-  const [cities, setCities] = useState([]); // ➕ Added cities state
+  const [cities, setCities] = useState([]); 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const [usernameValid, setUsernameValid] = useState(null);
   const [emailValid, setEmailValid] = useState(null);
-  const [phoneValid, setPhoneValid] = useState(null);
   const [passwordValid, setPasswordValid] = useState(null);
 
   const theme = useTheme();
@@ -42,6 +44,31 @@ const UserRegistration = () => {
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
   const phoneRegex = /^\d{10}$/;
   const usernameRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{4,}$/;
+
+  useEffect(() => {
+    const fetchPhoneCountries = async () => {
+      try {
+        const res = await axios.get(
+          "https://restcountries.com/v3.1/all?fields=name,idd"
+        );
+        const list = res.data
+          .filter(c => c.idd?.root) 
+          .map(c => ({
+            name: c.name?.common ?? "Unknown",
+            code: `${c.idd.root}${c.idd.suffixes?.[0] ?? ""}`,
+          }))
+          .filter(c => c.code && c.code.startsWith("+"))
+          .sort((a, b) => a.name.localeCompare(b.name));
+        setPhoneCountries(list);
+      } catch (err) {
+        console.error("Error fetching phone countries:", err.message);
+        setPhoneCountries([]);
+      }
+    };
+    fetchPhoneCountries();
+  }, []);
+
+
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -55,7 +82,6 @@ const UserRegistration = () => {
     fetchCountries();
   }, []);
 
-  // Fetch cities dynamically when country changes
   useEffect(() => {
     const fetchCities = async () => {
       if (formData.countryName) {
@@ -188,39 +214,31 @@ const UserRegistration = () => {
               }}
             />
 
-            <Box sx={{ display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row', mt: 2 }}>
-              <TextField
-                select
-                label="Country Code"
-                value={countryCode}
-                onChange={(e) => setCountryCode(e.target.value)}
-                fullWidth
-              >
-                {['+91', '+1', '+44', '+61', '+81'].map((code) => (
-                  <MenuItem key={code} value={code}>{code}</MenuItem>
-                ))}
-              </TextField>
+      <Box sx={{ display: "flex", gap: 2, flexDirection: isMobile ? "column" : "row", mt: 2 }}>
+        <TextField
+          select
+          label="Country Code"
+          value={countryCode}
+          onChange={(e) => setCountryCode(e.target.value)}
+          fullWidth
+        >
+          {(phoneCountries ?? []).map((c) => (
+            <MenuItem key={`${c.name}-${c.code}`} value={c.code}>
+              {c.name} ({c.code})
+            </MenuItem>
+          ))}
+        </TextField>
 
-              <TextField
-                label="Phone Number"
-                value={localNumber}
-                onChange={(e) => {
-                  setLocalNumber(e.target.value);
-                  setPhoneValid(phoneRegex.test(e.target.value));
-                }}
-                fullWidth
-                placeholder="1234567890"
-                helperText="Enter 10-digit number"
-                error={phoneValid === false}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: phoneValid === true ? 'green' : phoneValid === false ? 'red' : undefined,
-                    },
-                  },
-                }}
-              />
-            </Box>
+        {/* Phone Number Input (no validation now) */}
+        <TextField
+          label="Phone Number"
+          value={localNumber}
+          onChange={(e) => setLocalNumber(e.target.value.replace(/\D/g, ""))}
+          fullWidth
+          placeholder="1234567890"
+          helperText="Enter phone number"
+        />
+      </Box>
 
             <TextField fullWidth label="Address" name="address" value={formData.address} onChange={handleChange} margin="normal" required />
 

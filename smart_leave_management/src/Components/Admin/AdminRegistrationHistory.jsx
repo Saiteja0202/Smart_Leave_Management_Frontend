@@ -109,7 +109,7 @@ const AdminRegistrationHistory = () => {
                     'registrationId',
                     'firstName',
                     'lastName',
-                    'userId',
+                    // 'userId',
                     'email',
                     'role',
                     'registerDate'
@@ -132,7 +132,7 @@ const AdminRegistrationHistory = () => {
                     <TableCell align="center">{entry.registrationId}</TableCell>
                     <TableCell align="center">{entry.firstName}</TableCell>
                     <TableCell align="center">{entry.lastName}</TableCell>
-                    <TableCell align="center">{entry.userId}</TableCell>
+                    {/* <TableCell align="center">{entry.userId}</TableCell> */}
                     <TableCell align="center">{entry.email}</TableCell>
                     <TableCell align="center">{entry.role.replace(/_/g, ' ')}</TableCell>
                     <TableCell align="center">{new Date(entry.registerDate).toLocaleString()}</TableCell>

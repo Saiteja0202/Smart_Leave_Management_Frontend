@@ -33,7 +33,7 @@ const AdminAllUsersLeaveBalances = () => {
   const paginated = leaveBalances.slice((page - 1) * perPage, page * perPage);
 
   const downloadCSV = () => {
-    const headers = ['Name', 'Sick Leave', 'Casual Leave', 'Loss of Pay', 'Earned Leave', 'Paternity Leave', 'Maternity Leave', 'Total Leaves'];
+    const headers = ['firstName','lastName', 'Sick Leave', 'Casual Leave', 'Loss of Pay', 'Earned Leave', 'Paternity Leave', 'Maternity Leave', 'Total Leaves'];
     const rows = paginated.map(u => [
       `${u.firstName} ${u.lastName}`, u.sickLeave, u.casualLeave, u.lossOfPay,
       u.earnedLeave, u.paternityLeave, u.maternityLeave, u.totalLeaves

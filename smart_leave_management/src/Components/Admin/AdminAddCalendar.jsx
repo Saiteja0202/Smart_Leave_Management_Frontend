@@ -6,9 +6,6 @@ import {
   TablePagination
 } from '@mui/material';
 import Swal from 'sweetalert2';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
-
 import {
   uploadCalendar, updateCalendar, getAllHolidays,
   addCountryCalendar, updateSingleHoliday
@@ -36,10 +33,7 @@ const AdminAddCalendar = () => {
 
   useEffect(() => { fetchAllHolidays(); }, []);
 
-  const handleFileChange = (e) => {
-    const selected = e.target.files[0];
-    setFile(selected);
-  };
+  const handleFileChange = (e) => setFile(e.target.files[0]);
 
   const handleUpload = async () => {
     if (!file) return Swal.fire('Error', 'Please select an Excel file', 'error');
@@ -121,99 +115,32 @@ const AdminAddCalendar = () => {
   return (
     <Container maxWidth="xl">
       <Paper sx={{ p: 4, mt: 4, boxShadow: 4, borderRadius: 3 }}>
-
-        <Typography
-          variant="h5"
-          sx={{
-            p: 2, mb: 3, fontWeight: 'bold', color: 'white',
-            background: 'linear-gradient(to right, #183c86, #5c6bc0)',
-            borderRadius: 2
-          }}
-        >
+        <Typography variant="h5" sx={{ p: 2, mb: 3, fontWeight: 'bold', color: 'white', background: 'linear-gradient(to right, #183c86, #5c6bc0)', borderRadius: 2 }}>
           Upload & Manage Calendar
         </Typography>
 
-        {/* FILE UPLOAD SECTION — UPDATED */}
-        <Box
-          sx={{
-            mb: 3,
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            alignItems: { xs: 'stretch', sm: 'center' },
-            gap: 2
-          }}
-        >
-
-          {/* Hidden Input */}
-          <input
-            id="uploadFileInput"
-            type="file"
-            accept=".xlsx,.xls"
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
-          />
-
-          {/* Dynamic Choose File Button */}
-          <Button
-            variant="contained"
-            startIcon={<UploadFileIcon />}
-            onClick={() => document.getElementById('uploadFileInput').click()}
-            sx={{
-              flexShrink: 0,
-              textTransform: 'none',
-              px: 2,
-              py: 1,
-              fontSize: '0.8rem',
-              backgroundColor: file ? 'green' : 'primary'
-            }}
-          >
-            Choose File
-          </Button>
-
-          {/* File Name Display */}
-          <Typography
-            sx={{
-              fontSize: '0.75rem',
-              color: file ? 'green' : 'red',
-              border: '1px solid #ccc',
-              fontWeight:'bold',
-              px: 2,
-              py: 1,
-              borderRadius: 1,
-              flex: 1,
-              minHeight: '34px',
-              backgroundColor: '#f5f5f5',
-              display: 'flex',
-              alignItems: 'center'
-            }}
-          >
-            {file ? file.name : 'No file chosen'}
-          </Typography>
-
-          {/* Template Download */}
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<CloudDownloadIcon />}
-            component="a"
-            href="/All_Holidays_Calendar.xlsx"
-            download
-            sx={{ flexShrink: 0, px: 2, py: 1, fontSize: '0.8rem' }}
-          >
-            Download Template
-          </Button>
+        <Box sx={{ mb: 3 }}>
+          <input type="file" accept=".xlsx,.xls" onChange={handleFileChange} />
         </Box>
-
-        {/* Upload + Update + Add Button Group */}
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 3 }}>
-          <Button variant="contained" onClick={handleUpload} disabled={loading}>
-            {loading ? <CircularProgress size={24} /> : 'Upload'}
-          </Button>
-          <Button variant="contained" onClick={handleUpdate} disabled={loading || holidays.length === 0}>
-            {loading ? <CircularProgress size={24} /> : 'Update'}
-          </Button>
-          <Button variant="contained" onClick={() => setOpenAddDialog(true)}>Add Holiday</Button>
-        </Box>
+  <Button variant="contained" onClick={handleUpload} disabled={loading}>
+    {loading ? <CircularProgress size={24} /> : 'Upload'}
+  </Button>
+  <Button variant="contained" onClick={handleUpdate} disabled={loading || holidays.length === 0}>
+    {loading ? <CircularProgress size={24} /> : 'Update'}
+  </Button>
+  <Button variant="contained" onClick={() => setOpenAddDialog(true)}>Add Holiday</Button>
+
+  {/* ✅ Download Template aligned with other buttons */}
+  <Button
+    variant="contained"
+    color="primary"
+    href="/All_Holidays_Calendar.xlsx"
+    download
+  >
+    Download Template
+  </Button>
+</Box>
 
         <TextField
           label="Search Holidays"
@@ -224,7 +151,6 @@ const AdminAddCalendar = () => {
           onChange={(e) => setSearch(e.target.value)}
         />
 
-        {/* TABLE */}
         {filteredHolidays.length > 0 ? (
           <TableContainer component={Paper}>
             <Table>
@@ -251,7 +177,6 @@ const AdminAddCalendar = () => {
                   ))}
                 </TableRow>
               </TableHead>
-
               <TableBody>
                 {filteredHolidays.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((holiday) => (
                   <TableRow key={holiday.holidayId}>
@@ -262,7 +187,6 @@ const AdminAddCalendar = () => {
                     <TableCell>{holiday.holidayDay}</TableCell>
                     <TableCell>{holiday.calendarYear}</TableCell>
                     <TableCell>{holiday.cityName}</TableCell>
-
                     <TableCell>
                       <Button onClick={() => { setSelectedHoliday(holiday); setOpenEditDialog(true); }}>
                         Edit
@@ -272,7 +196,6 @@ const AdminAddCalendar = () => {
                 ))}
               </TableBody>
             </Table>
-
             <TablePagination
               component="div"
               count={filteredHolidays.length}
@@ -290,7 +213,7 @@ const AdminAddCalendar = () => {
           <Typography>No holidays found in database.</Typography>
         )}
 
-        {/* ADD HOLIDAY DIALOG */}
+        {/* Add Holiday Dialog */}
         <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)} fullWidth>
           <DialogTitle>Add New Holiday</DialogTitle>
           <DialogContent>
@@ -313,7 +236,7 @@ const AdminAddCalendar = () => {
           </DialogActions>
         </Dialog>
 
-        {/* EDIT HOLIDAY DIALOG */}
+        {/* Edit Holiday Dialog */}
         <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)} fullWidth>
           <DialogTitle>Edit Holiday</DialogTitle>
           <DialogContent>
@@ -331,7 +254,9 @@ const AdminAddCalendar = () => {
                     InputLabelProps={field === 'holidayDate' ? { shrink: true } : undefined}
                     fullWidth
                     value={selectedHoliday[field]}
-                    onChange={(e) => setSelectedHoliday({ ...selectedHoliday, [field]: e.target.value })}
+                    onChange={(e) =>
+                      setSelectedHoliday({ ...selectedHoliday, [field]: e.target.value })
+                    }
                   />
                 ))}
           </DialogContent>
@@ -340,7 +265,6 @@ const AdminAddCalendar = () => {
             <Button onClick={handleEditHoliday}>Save</Button>
           </DialogActions>
         </Dialog>
-
       </Paper>
     </Container>
   );

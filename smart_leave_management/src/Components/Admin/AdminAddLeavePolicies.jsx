@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import {
   Box, Button, TextField, Typography, CircularProgress, Container, Paper,
   FormControl, InputLabel, Select, MenuItem, Divider, Table, TableBody,
-  TableCell, TableContainer, TableHead, TableRow, Card, CardContent
+  TableCell, TableContainer, TableHead, TableRow, Card, CardContent,
+  Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
 import Swal from 'sweetalert2';
-import { addLeavePolicies, getAllLeavePolicies, getAllRoles } from '../ApiCenter/AdminApi';
+import { addLeavePolicies, getAllLeavePolicies, getAllRoles, updateLeavePolicies } from '../ApiCenter/AdminApi';
 
 const AdminAddRolePolicies = () => {
   const adminId = sessionStorage.getItem('adminId');
@@ -17,6 +18,13 @@ const AdminAddRolePolicies = () => {
   const [usedRoles, setUsedRoles] = useState([]);
   const [leavePolicies, setLeavePolicies] = useState([]);
   const [fetching, setFetching] = useState(true);
+
+  // Dialog states
+  const [openDialog, setOpenDialog] = useState(false);
+  const [editingPolicy, setEditingPolicy] = useState(null);
+  const [editData, setEditData] = useState({
+    sickLeave: '', earnedLeave: '', casualLeave: '', paternityLeave: '', maternityLeave: ''
+  });
 
   useEffect(() => {
     if (!adminId) return;
@@ -58,6 +66,47 @@ const AdminAddRolePolicies = () => {
     }
   };
 
+  // Dialog handlers
+  const handleEditClick = (policy) => {
+    setEditingPolicy(policy.roleBasedLeaveId);
+    setEditData({
+      sickLeave: policy.sickLeave,
+      earnedLeave: policy.earnedLeave,
+      casualLeave: policy.casualLeave,
+      paternityLeave: policy.paternityLeave,
+      maternityLeave: policy.maternityLeave,
+    });
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setEditingPolicy(null);
+  };
+
+  const handleUpdateSubmit = async () => {
+    try {
+      const payload = {
+        sickLeave: Number(editData.sickLeave),
+        earnedLeave: Number(editData.earnedLeave),
+        casualLeave: Number(editData.casualLeave),
+        paternityLeave: Number(editData.paternityLeave),
+        maternityLeave: Number(editData.maternityLeave),
+      };
+
+      // ✅ new API signature: adminId + roleBasedLeaveId in URL, payload in body
+      await updateLeavePolicies(adminId, editingPolicy, payload);
+
+      Swal.fire({ icon: 'success', title: 'Policy Updated', timer: 2000, showConfirmButton: false });
+      handleCloseDialog();
+
+      const res = await getAllLeavePolicies(adminId);
+      setLeavePolicies(res.data);
+    } catch {
+      Swal.fire('Error', 'Failed to update policy', 'error');
+    }
+  };
+
   return (
     <Container maxWidth="100">
       <Paper elevation={4} sx={{ p: 4, mt: 5, borderRadius: 4, background: '#fff' }}>
@@ -67,6 +116,7 @@ const AdminAddRolePolicies = () => {
           </Typography>
         </Box>
 
+        {/* Add Policy Form */}
         <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <FormControl fullWidth required>
             <InputLabel>Select Role</InputLabel>
@@ -122,7 +172,7 @@ const AdminAddRolePolicies = () => {
                 <Table size="small">
                   <TableHead sx={{ backgroundColor: '#183c86' }}>
                     <TableRow>
-                      {['Role', 'Sick', 'Earned', 'Casual', 'Paternity', 'Maternity', 'Total'].map((head) => (
+                      {['Role', 'Sick', 'Earned', 'Casual', 'Paternity', 'Maternity', 'Total', 'Actions'].map((head) => (
                         <TableCell key={head} sx={{ color: '#fff', fontWeight: 'bold', textAlign: 'center' }}>
                           {head}
                         </TableCell>
@@ -139,6 +189,11 @@ const AdminAddRolePolicies = () => {
                         <TableCell align="center">{p.paternityLeave}</TableCell>
                         <TableCell align="center">{p.maternityLeave}</TableCell>
                         <TableCell align="center" sx={{ fontWeight: 'bold', color: '#183c86' }}>{p.totalLeaves}</TableCell>
+                        <TableCell align="center">
+                          <Button onClick={() => handleEditClick(p)} variant="outlined" size="small">
+                            Edit
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -147,6 +202,40 @@ const AdminAddRolePolicies = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Edit Dialog */}
+        <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
+          <DialogTitle>Edit Leave Policy</DialogTitle>
+          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            {['sickLeave','earnedLeave','casualLeave','paternityLeave','maternityLeave'].map(field => (
+              <TextField
+                key={field}
+                type="number"
+                label={field.replace(/([A-Z])/g, ' $1')}
+                value={editData[field]}
+                onChange={(e) => setEditData({ ...editData, [field]: e.target.value })}
+                fullWidth
+              />
+            ))}
+
+            {/* Computed Total Leaves */}
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#183c86' }}>
+                Total Leaves: {Number(editData.sickLeave || 0) +
+                               Number(editData.earnedLeave || 0) +
+                               Number(editData.casualLeave || 0) +
+                               Number(editData.paternityLeave || 0) +
+                               Number(editData.maternityLeave || 0)}
+              </Typography>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog} color="secondary">Cancel</Button>
+            <Button onClick={handleUpdateSubmit} variant="contained" sx={{ backgroundColor: '#183c86' }}>
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Paper>
     </Container>
   );

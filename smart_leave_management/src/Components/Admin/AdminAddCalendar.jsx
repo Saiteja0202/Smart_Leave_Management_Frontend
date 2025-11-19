@@ -164,10 +164,7 @@ const AdminAddCalendar = () => {
               px: 2,
               py: 1,
               fontSize: '0.8rem',
-              backgroundColor: file ? 'green' : 'red',
-              '&:hover': {
-                backgroundColor: file ? '#0f7d0f' : '#b30000'
-              }
+              backgroundColor: file ? 'green' : 'primary'
             }}
           >
             Choose File
@@ -177,8 +174,9 @@ const AdminAddCalendar = () => {
           <Typography
             sx={{
               fontSize: '0.75rem',
-              color: file ? 'black' : 'gray',
+              color: file ? 'green' : 'red',
               border: '1px solid #ccc',
+              fontWeight:'bold',
               px: 2,
               py: 1,
               borderRadius: 1,

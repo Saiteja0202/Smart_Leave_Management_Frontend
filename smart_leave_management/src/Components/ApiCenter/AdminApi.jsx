@@ -60,6 +60,10 @@ export const deleteUser = (adminId, userId) =>
 export const updateAdminDetails = (adminId, adminData) =>
   axiosInstance.put(`/admin/update/${adminId}`, adminData);
 
+export const updateLeavePolicies = (adminId, roleBasedLeaveId, roleBasedLeavePolicies) =>
+  axiosInstance.put(`/admin/update-leave-policy/${adminId}/${roleBasedLeaveId}`,roleBasedLeavePolicies);
+
+
 
 
 export const uploadCalendar = (adminId, file) => {

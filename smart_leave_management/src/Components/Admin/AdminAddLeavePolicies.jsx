@@ -19,6 +19,9 @@ const AdminAddRolePolicies = () => {
   const [leavePolicies, setLeavePolicies] = useState([]);
   const [fetching, setFetching] = useState(true);
 
+  // Validation errors
+  const [errors, setErrors] = useState({});
+
   // Dialog states
   const [openDialog, setOpenDialog] = useState(false);
   const [editingPolicy, setEditingPolicy] = useState(null);
@@ -49,8 +52,25 @@ const AdminAddRolePolicies = () => {
 
   const handleChange = (e) => setPolicyData({ ...policyData, [e.target.name]: e.target.value });
 
+  const validatePolicyData = (data) => {
+    const newErrors = {};
+    ['sickLeave','earnedLeave','casualLeave','paternityLeave','maternityLeave'].forEach(field => {
+      if (!data[field] || Number(data[field]) <= 0) {
+        newErrors[field] = "Value must be greater than 0";
+      }
+    });
+    return newErrors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const newErrors = validatePolicyData(policyData);
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      Swal.fire('Validation Error', 'Please fix the highlighted fields', 'warning');
+      return;
+    }
+    setErrors({});
     setLoading(true);
     try {
       await addLeavePolicies(adminId, policyData);
@@ -82,9 +102,17 @@ const AdminAddRolePolicies = () => {
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setEditingPolicy(null);
+    setErrors({});
   };
 
   const handleUpdateSubmit = async () => {
+    const newErrors = validatePolicyData(editData);
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      Swal.fire('Validation Error', 'Please fix the highlighted fields', 'warning');
+      return;
+    }
+    setErrors({});
     try {
       const payload = {
         sickLeave: Number(editData.sickLeave),
@@ -93,13 +121,9 @@ const AdminAddRolePolicies = () => {
         paternityLeave: Number(editData.paternityLeave),
         maternityLeave: Number(editData.maternityLeave),
       };
-
-      // ✅ new API signature: adminId + roleBasedLeaveId in URL, payload in body
       await updateLeavePolicies(adminId, editingPolicy, payload);
-
       Swal.fire({ icon: 'success', title: 'Policy Updated', timer: 2000, showConfirmButton: false });
       handleCloseDialog();
-
       const res = await getAllLeavePolicies(adminId);
       setLeavePolicies(res.data);
     } catch {
@@ -129,7 +153,7 @@ const AdminAddRolePolicies = () => {
             </Select>
           </FormControl>
 
-          {['sickLeave', 'earnedLeave', 'casualLeave', 'paternityLeave', 'maternityLeave'].map((field) => (
+          {['sickLeave','earnedLeave','casualLeave','paternityLeave','maternityLeave'].map((field) => (
             <TextField
               key={field}
               fullWidth
@@ -139,6 +163,8 @@ const AdminAddRolePolicies = () => {
               value={policyData[field]}
               onChange={handleChange}
               required
+              error={!!errors[field]}
+              helperText={errors[field] || ""}
             />
           ))}
 
@@ -182,63 +208,70 @@ const AdminAddRolePolicies = () => {
                   <TableBody>
                     {leavePolicies.map((p) => (
                       <TableRow key={p.roleBasedLeaveId} sx={{ '&:hover': { backgroundColor: 'rgba(24,60,134,0.05)', transition: '0.2s' } }}>
-                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>{p.role.replace(/_/g, ' ')}</TableCell>
-                        <TableCell align="center">{p.sickLeave}</TableCell>
-                        <TableCell align="center">{p.earnedLeave}</TableCell>
-                        <TableCell align="center">{p.casualLeave}</TableCell>
-                        <TableCell align="center">{p.paternityLeave}</TableCell>
-                        <TableCell align="center">{p.maternityLeave}</TableCell>
-                        <TableCell align="center" sx={{ fontWeight: 'bold', color: '#183c86' }}>{p.totalLeaves}</TableCell>
-                        <TableCell align="center">
-                          <Button onClick={() => handleEditClick(p)} variant="outlined" size="small">
-                            Edit
-                          </Button>
+                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+                          {p.role.replace(/_/g, ' ')}
                         </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CardContent>
-          </Card>
-        )}
 
-        {/* Edit Dialog */}
-        <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-          <DialogTitle>Edit Leave Policy</DialogTitle>
-          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-            {['sickLeave','earnedLeave','casualLeave','paternityLeave','maternityLeave'].map(field => (
-              <TextField
-                key={field}
-                type="number"
-                label={field.replace(/([A-Z])/g, ' $1')}
-                value={editData[field]}
-                onChange={(e) => setEditData({ ...editData, [field]: e.target.value })}
-                fullWidth
-              />
-            ))}
+                                                    <TableCell align="center">{p.sickLeave}</TableCell>
+                                                    <TableCell align="center">{p.earnedLeave}</TableCell>
+                                                    <TableCell align="center">{p.casualLeave}</TableCell>
+                                                    <TableCell align="center">{p.paternityLeave}</TableCell>
+                                                    <TableCell align="center">{p.maternityLeave}</TableCell>
+                                                    <TableCell align="center" sx={{ fontWeight: 'bold', color: '#183c86' }}>
+                                                      {p.totalLeaves}
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                      <Button onClick={() => handleEditClick(p)} variant="outlined" size="small">
+                                                        Edit
+                                                      </Button>
+                                                    </TableCell>
+                                                  </TableRow>
+                                                ))}
+                                              </TableBody>
+                                            </Table>
+                                          </TableContainer>
+                                        </CardContent>
+                                      </Card>
+                                    )}
 
-            {/* Computed Total Leaves */}
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#183c86' }}>
-                Total Leaves: {Number(editData.sickLeave || 0) +
-                               Number(editData.earnedLeave || 0) +
-                               Number(editData.casualLeave || 0) +
-                               Number(editData.paternityLeave || 0) +
-                               Number(editData.maternityLeave || 0)}
-              </Typography>
-            </Box>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseDialog} color="secondary">Cancel</Button>
-            <Button onClick={handleUpdateSubmit} variant="contained" sx={{ backgroundColor: '#183c86' }}>
-              Save
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Paper>
-    </Container>
-  );
-};
+                                    {/* Edit Dialog */}
+                                    <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
+                                      <DialogTitle>Edit Leave Policy</DialogTitle>
+                                      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+                                        {['sickLeave','earnedLeave','casualLeave','paternityLeave','maternityLeave'].map(field => (
+                                          <TextField
+                                            key={field}
+                                            type="number"
+                                            label={field.replace(/([A-Z])/g, ' $1')}
+                                            value={editData[field]}
+                                            onChange={(e) => setEditData({ ...editData, [field]: e.target.value })}
+                                            fullWidth
+                                            error={!!errors[field]}
+                                            helperText={errors[field] || ""}
+                                          />
+                                        ))}
 
-export default AdminAddRolePolicies;
+                                        {/* Computed Total Leaves */}
+                                        <Box sx={{ mt: 2 }}>
+                                          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#183c86' }}>
+                                            Total Leaves: {Number(editData.sickLeave || 0) +
+                                                           Number(editData.earnedLeave || 0) +
+                                                           Number(editData.casualLeave || 0) +
+                                                           Number(editData.paternityLeave || 0) +
+                                                           Number(editData.maternityLeave || 0)}
+                                          </Typography>
+                                        </Box>
+                                      </DialogContent>
+                                      <DialogActions>
+                                        <Button onClick={handleCloseDialog} color="secondary">Cancel</Button>
+                                        <Button onClick={handleUpdateSubmit} variant="contained" sx={{ backgroundColor: '#183c86' }}>
+                                          Save
+                                        </Button>
+                                      </DialogActions>
+                                    </Dialog>
+                                  </Paper>
+                                </Container>
+                              );
+                            };
+
+                            export default AdminAddRolePolicies;

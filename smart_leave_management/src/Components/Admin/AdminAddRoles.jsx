@@ -64,6 +64,20 @@ const AdminAddRoles = () => {
         </Box>
 
         <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box
+            sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                mb: 3,
+                }} >
+            <img src="/Roles_Hierarchy.png" alt="Roles Hierarchy"
+            style={{
+                maxWidth: '100%',
+                height: 'auto',
+                borderRadius: '8px',
+                boxShadow: '0 3px 8px rgba(0,0,0,0.15)',
+                 }} />
+             </Box>
           <FormControl fullWidth required>
             <InputLabel>Select Role</InputLabel>
             <Select value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} label="Select Role">
@@ -77,10 +91,10 @@ const AdminAddRoles = () => {
 
           <TextField
             fullWidth
-            label="Description"
+            label="Description in 50-100 words"
             value={customDescription}
             onChange={(e) => setCustomDescription(e.target.value)}
-            placeholder="Optional: Customize role description"
+            placeholder="Optional: Customize role description in 50-100 words"
             multiline
             rows={2}
           />

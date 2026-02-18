@@ -243,7 +243,7 @@ const AdminAddCalendar = () => {
             {selectedHoliday &&
               Object.keys(selectedHoliday)
                 .filter((field) =>
-                  ['countryName', 'calendarYear', 'holidayName', 'holidayDate', 'cityName', 'holidayDay'].includes(field)
+                  ['countryName', 'calendarYear', 'holidayName', 'holidayDate', 'cityName'].includes(field)
                 )
                 .map((field) => (
                   <TextField
